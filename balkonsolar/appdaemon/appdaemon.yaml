@@ -1,0 +1,27 @@
+appdaemon:
+  latitude: 47.9990
+  longitude: 7.8421
+  elevation: 278
+  time_zone: Europe/Berlin
+
+  # Plugins section to connect to Home Assistant (HASS)
+  plugins:
+    HASS:
+      type: hass
+      ha_url: "https://sgyiv0nrwtxojazwfihtt39gmvmhlndm.ui.nabu.casa"  # Replace with your Home Assistant URL
+      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkYTY0NWFjYjBkZDE0NzExYmUyMDRkNGFmMmU0ZWIwOSIsImlhdCI6MTc0NjgxNjcyMiwiZXhwIjoyMDYyMTc2NzIyfQ.71xLTtzY8Zsrl5sqCx4hxwj-nWU4k8_F_yG37eNDUMg"    # Replace with your Home Assistant long-lived access token
+
+  # Log settings
+  logs:
+    main_log:
+      filename: STDOUT
+      level: DEBUG
+
+  # Apps section to define apps (automations or custom logic)
+  apps:
+    hello_world:
+      module: hello_world  # This should match the Python file in your 'apps' directory
+      class: HelloWorld    # This should match the class name in your 'hello_world.py' file
+    read_shelly_energy:
+      module: read_sensor
+      class: ReadShellyEnergy
