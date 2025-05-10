@@ -9,6 +9,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from diskcache import Cache
+from core.database_interface import DatabaseInterface
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +130,14 @@ class ForecastSolarClient():
             ttl_seconds: New TTL value in seconds
         """
         self.cache_ttl = ttl_seconds
+    
+    def save_irradiation_data_to_database(self, value: float, timestamp: Optional[str] = None):
+        '''
+        Save the irradiation data to the database.
+        '''
+        # TODO: FINISH THIS
+        db = DatabaseInterface()
+        db.store_irradiation_data(value, timestamp)
 
 if __name__ == "__main__":
     if __name__ == '__main__':

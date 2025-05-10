@@ -108,6 +108,24 @@ class DatabaseManager:
                 tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 value REAL NOT NULL
             )
+            """,
+
+            # Table for irradiation data
+            """
+            CREATE TABLE IF NOT EXISTS irradiation_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                value REAL NOT NULL
+            )
+            """,
+
+            # Table to save the output algorithm
+            """
+            CREATE TABLE IF NOT EXISTS output_algorithm (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                value REAL NOT NULL
+            )
             """
         ]
         

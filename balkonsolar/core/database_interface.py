@@ -197,3 +197,41 @@ class DatabaseInterface:
     def get_grid_history(self, hours: int = 24) -> List[Dict[str, Any]]:
         """Get grid usage history"""
         return self.get_history("grid_usage", hours) 
+    
+    def store_value(self, table: str, value: float, timestamp: Optional[str] = None) -> bool:
+        """
+        Store a value in a specific table
+        
+        Args:
+            table: Table name
+            value: Value to store
+            timestamp: Optional timestamp (if None, current time is used)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            conn = self._get_connection()
+            cursor = conn.cursor()
+            
+            if timestamp:
+                cursor.execute(
+                    f"INSERT INTO {table} (tstamp, value) VALUES (?, ?)",
+                    (timestamp, value)
+                )
+            else:
+                cursor.execute(
+                    f"INSERT INTO {table} (value) VALUES (?)",
+                    (value,)
+                )
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error storing value in {table}: {e}")
+            return False
+        
+    def store_irradiation_data(self, value: float, timestamp: Optional[str] = None) -> bool:
+        """Store irradiation data value"""
+        return self.store_value("irradiation_data", value, timestamp)
