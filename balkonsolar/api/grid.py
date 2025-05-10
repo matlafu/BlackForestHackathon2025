@@ -4,7 +4,6 @@ Grid demand API client for StromGedacht and OpenGridMap.
 import requests
 from typing import Optional
 import logging
-import asyncio
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
