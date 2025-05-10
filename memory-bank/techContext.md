@@ -74,6 +74,13 @@
 - chart.js==4.4.1
 - @tanstack/react-query==5.8.7
 
+## Hardware Used
+- Shelly smart meter (measures current household energy usage)
+- Smart Wi-Fi LED light (status indicator, integrated with Home Assistant)
+- Shelly plugs (control devices via Home Assistant)
+- Solar Panels with Zendure SolarFlow 800 inverter
+- Zendure battery storage
+
 ## Technical Constraints
 - **Hardware Requirements**: Minimal resource usage for Raspberry Pi compatibility
 - **Network**: Support for local network operation
@@ -85,3 +92,12 @@
 - **Maintainability**: Clear documentation and code structure
 
 Note: Needs to be updated with specific technical details.
+
+# MVP Technical Implications
+
+Refer to the Minimum Viable Product (MVP) section in productContext.md for the current project focus. The MVP requires:
+- Integration with Home Assistant as the main hub for device and sensor data.
+- Support for data sources: energy prices, weather forecasts, battery charge/capacity, current energy use, and production.
+- Initial implementation of simple rule-based (if-then) logic for optimization, with plans for linear optimization in later stages.
+- Hardware interaction for battery charging/discharging, device switching, and signaling.
+- User interface to display recommendations, available charge, and algorithmic reasoning.

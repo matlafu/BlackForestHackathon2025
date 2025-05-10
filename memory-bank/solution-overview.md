@@ -1,5 +1,7 @@
 # BalkonSolar Solution Overview
 
++Note: For detailed user goals, data requirements, and logic assumptions, see the MVP section in productContext.md.
+
 ## System Workflow
 
 ### 1. Data Collection and Analysis
