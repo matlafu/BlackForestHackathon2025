@@ -1,13 +1,76 @@
 """
-Grid demand API client for OpenGridMap.
+Grid demand API client for StromGedacht and OpenGridMap.
 """
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Union
 
-from loguru import logger
+import logging
 
 from balkonsolar.api.base import BaseAPIClient
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+class StromGedachtClient(BaseAPIClient):
+    """Client for StromGedacht API."""
+
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        timeout: int = 30,
+        cache_ttl: int = 300,  # 5 minutes
+        zip_code: int|None = None
+    ):
+        """
+        Initialize the StromGedacht API client.
+
+        Args:
+            api_key: StromGedacht API key
+            timeout: Request timeout in seconds
+            cache_ttl: Cache TTL in seconds
+        """
+        super().__init__(
+            base_url="https://api.stromgedacht.de/v1/now",
+            api_key=api_key,
+            timeout=timeout,
+            cache_ttl=cache_ttl,
+            zip_code=zip_code
+        )
+    
+    @staticmethod
+    async def get_stromgedacht_mapping():
+        return {
+            -1 : 'Ideally use electricity now',
+            1 : 'Normal operation',
+            3 : 'Reduce consumption (save cost & CO2)',
+            4 : 'Reduce consumption (prevent power shortfalls)'
+        }
+
+    async def get_grid_load(
+        self,
+        zip_code: Optional[int|None] = None
+    ) -> Dict[int, str]:
+        """
+        Get the mapping of the Strom Gedacht API.
+        Mappings:
+        -1: Ideally use electricity now
+        1: Normal operation
+        """
+        # Use the base zip code if not provided
+        zip_code = self.zip_code if zip_code is None else zip_code
+        params = {
+            "zip": zip_code
+        }
+        response = await self._request("GET", self.base_url, params=params)
+        mappings = await self.get_stromgedacht_mapping()
+        if response.get("status") == "success":
+            return mappings[response.get("value")]
+        else:
+            return {
+                "status": "error",
+                "message": response.get("message")
+            }
 
 
 class OpenGridMapClient(BaseAPIClient):
