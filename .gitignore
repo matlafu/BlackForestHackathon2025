@@ -2,3 +2,6 @@
 .venv/
 *.ipynb
 /balkonsolar/.env
+__pycache__/
+*/__pycache__/
+*/.env
