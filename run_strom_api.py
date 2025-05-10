@@ -67,15 +67,15 @@ async def main():
         print("Hourly state array:")
         print(state_array)
 
+        # Handle different potential response formats
+        print_more_info = False
+
         # Add debug output
         print(f"Forecast type: {type(forecast)}")
 
         # Pretty print for better readability
         print("Forecast content:")
         pprint(forecast)
-
-        # Handle different potential response formats
-        print_more_info = False
         if print_more_info:
             if isinstance(forecast, list):
                 print("\nParsed forecast data:")
