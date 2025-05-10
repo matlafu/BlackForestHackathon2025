@@ -77,3 +77,15 @@ Note: This document needs to be populated with specific product details.
 
 ## Integration
 We want to work with Home Assistant as our main Hub that controls the devices and provides us with data of the sensors (+ external data through APIs). Our solution is to be integrated closely with Home Assistant (probably running as an AppDaemon alongside).
+
+# [2024-05-10] Virtual Battery & AppDaemon System Updates
+
+- Modular virtual battery system with controller, supporting activation/deactivation and external charge setting.
+- Absolute imports used for all AppDaemon apps (e.g., `from virtual_battery import VirtualBattery`).
+- Sensor readers (`household_consumption_reader.py`, `pv_production_reader.py`) handle 'unavailable' or non-numeric values gracefully, defaulting to 0.0 W and logging a warning.
+- Both readers log their current value every minute, even if unchanged.
+- Battery controller auto-turns off and logs when fully charged/discharged; can be set externally via `set_battery_charge()`.
+- Debugging: Added logs to `initialize()`, checked app names in `apps.yaml`, and handled app availability.
+- Noted that Home Assistant connection errors are unrelated to app logic and are usually transient.
+
+---
