@@ -19,9 +19,4 @@ appdaemon:
 
   # Apps section to define apps (automations or custom logic)
   apps:
-    hello_world:
-      module: hello_world  # This should match the Python file in your 'apps' directory
-      class: HelloWorld    # This should match the class name in your 'hello_world.py' file
-    read_shelly_energy:
-      module: read_sensor
-      class: ReadShellyEnergy
+    - apps/apps.yaml

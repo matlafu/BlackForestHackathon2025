@@ -3,5 +3,9 @@ hello_world:
   class: HelloWorld
 
 read_shelly_energy:
-  module: read_sensor
+  module: read_data
   class: ReadShellyEnergy
+
+random_bulb_color:
+  module: write_data
+  class: RandomBulbColor
