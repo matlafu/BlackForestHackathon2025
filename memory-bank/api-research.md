@@ -1,5 +1,7 @@
 # API Research for BalkonSolar
 
++Note: The APIs and data sources listed here are required for the MVP as defined in productContext.md (energy prices, weather, battery, usage, production).
+
 ## 1. Weather Data APIs
 
 ### OpenWeatherMap API

@@ -8,6 +8,7 @@ The BalkonSolar solution will follow a modular, event-driven architecture with t
    - Algorithm for optimizing battery charging/discharging
    - Grid demand prediction
    - Cost-benefit analysis
+   - MVP: Start with simple if-then rule logic as described in productContext.md, with plans to evolve to linear optimization.
 
 2. **Data Integration Layer**
    - API connectors for external data sources
@@ -41,6 +42,7 @@ The BalkonSolar solution will follow a modular, event-driven architecture with t
 - **Observer Pattern**: For event notification
 - **Factory Pattern**: For device management
 - **Adapter Pattern**: For API integrations
+- **MVP Logic Evolution**: Begin with simple rule-based logic (see productContext.md MVP), with a roadmap to more advanced optimization patterns.
 
 ## Component Relationships
 ```
@@ -67,3 +69,10 @@ The BalkonSolar solution will follow a modular, event-driven architecture with t
 - **Standard Protocols**: Use industry-standard protocols for device communication
 
 Note: To be updated as system architecture evolves.
+
+## Hardware Used
+- Shelly smart meter (measures current household energy usage)
+- Smart Wi-Fi LED light (status indicator, integrated with Home Assistant)
+- Shelly plugs (control devices via Home Assistant)
+- Solar Panels with Zendure SolarFlow 800 inverter
+- Zendure battery storage
