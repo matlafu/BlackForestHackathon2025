@@ -1,6 +1,6 @@
 import appdaemon.plugins.hass.hassapi as hass
 from virtual_battery import VirtualBattery
-from balkonsolar.database_shenanigans.energy_db import EnergyDB
+from database_utils import DatabaseManager
 
 class BatteryController(hass.Hass):
     def initialize(self):
@@ -8,7 +8,12 @@ class BatteryController(hass.Hass):
         self.pv_app = self.get_app("pv_production_reader")
         self.consumption_app = self.get_app("household_consumption_reader")
         self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
-        self.energy_db = EnergyDB()
+        
+        # Initialize database with path from config
+        db_path = self.args.get("db_path", None)  # None will use the default path
+        self.db_manager = DatabaseManager(db_path)
+        self.log(f"Database initialized at {self.db_manager.db_path}")
+        
         self.active = False
         self.current_action = "off"
         self.current_power = 0.0
@@ -51,11 +56,13 @@ class BatteryController(hass.Hass):
             self.active = False
             self.log("Battery fully discharged, turning off.")
         self.log(self._status_log(state))
-        # Log battery status to the database
-        battery_level = self.battery.current_charge  # in kWh
+        
+        # Log solar, battery, and grid data to the database
         timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
-        self.energy_db.store_battery_status(battery_level, timestamp)
-        self.log(f"Logged battery status {battery_level} kWh to database at {timestamp}")
+        self.db_manager.store_battery_status(self.battery.current_charge, timestamp)
+        self.db_manager.store_solar_output(pv_power, timestamp)
+        self.db_manager.store_grid_usage(grid_power, timestamp)
+        self.log(f"Logged energy data to database at {timestamp}")
 
     def activate_battery(self):
         self.active = True
@@ -106,3 +113,8 @@ class BatteryController(hass.Hass):
         # Access the VirtualBattery internal attribute
         self.battery.current_charge = new_charge
         self.log(f"Battery charge manually set to {new_charge:.2f} kWh")
+        
+        # Log the manual change to the database
+        timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
+        self.log(f"Logging battery charge {new_charge} kWh to database at {timestamp}")
+        self.db_manager.store_battery_status(new_charge, timestamp)

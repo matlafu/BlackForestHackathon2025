@@ -1,10 +1,14 @@
-import hassapi as hass
-from balkonsolar.database_shenanigans.energy_db import EnergyDB
+import appdaemon.plugins.hass.hassapi as hass
+from database_utils import DatabaseManager
 
 class HouseholdConsumptionReader(hass.Hass):
     def initialize(self):
         self.entity_id = "sensor.shellypro3em63_fce8c0dad39c_total_active_power"
-        self.energy_db = EnergyDB()
+        # Initialize database with path from config
+        db_path = self.args.get("db_path", None)  # None will use the default path
+        self.db_manager = DatabaseManager(db_path)
+        self.log(f"Database initialized at {self.db_manager.db_path}")
+        
         value = self.get_state(self.entity_id)
         try:
             self.latest_value = float(value)
@@ -26,7 +30,7 @@ class HouseholdConsumptionReader(hass.Hass):
     def log_consumption_power(self, kwargs):
         consumption_power = self.latest_value
         timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
-        self.energy_db.store_grid_usage(consumption_power, timestamp)
+        self.db_manager.store_grid_usage(consumption_power, timestamp)
         self.log(f"Logged household consumption {consumption_power} W to database at {timestamp}")
 
     def get_latest_value(self):

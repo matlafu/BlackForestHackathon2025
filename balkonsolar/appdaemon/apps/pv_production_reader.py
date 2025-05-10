@@ -1,10 +1,13 @@
 import appdaemon.plugins.hass.hassapi as hass
-from balkonsolar.database_shenanigans.energy_db import EnergyDB
+from database_utils import DatabaseManager
 
 class PVProductionReader(hass.Hass):
     def initialize(self):
         self.sensor = "sensor.8cbfea97f1ec_power"
-        self.energy_db = EnergyDB()
+        # Initialize database with path from config
+        db_path = self.args.get("db_path", None)  # None will use the default path
+        self.db_manager = DatabaseManager(db_path)
+        self.log(f"Database initialized at {self.db_manager.db_path}")
         value = self.get_state(self.sensor)
         try:
             self.latest_value = float(value)
@@ -17,7 +20,7 @@ class PVProductionReader(hass.Hass):
     def log_pv_power(self, kwargs):
         pv_power = float(self.get_state(self.sensor))
         timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
-        self.energy_db.store_solar_output(pv_power, timestamp)
+        self.db_manager.store_solar_output(pv_power, timestamp)
         self.log(f"Logged PV power {pv_power} W to database at {timestamp}")
 
     def state_changed(self, entity, attribute, old, new, kwargs):
