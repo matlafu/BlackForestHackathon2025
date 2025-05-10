@@ -6,7 +6,9 @@ class BatteryController(hass.Hass):
         self.log("BatteryController initialized! App name: battery_controller")
         self.pv_app = self.get_app("pv_production_reader")
         self.consumption_app = self.get_app("household_consumption_reader")
-        self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
+        # Make sure battery is initialized
+        if not hasattr(self, 'battery'):
+            self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
         self.active = False
         self.current_action = "off"
         self.current_power = 0.0
@@ -91,5 +93,11 @@ class BatteryController(hass.Hass):
         )
 
     def set_battery_charge(self, kwh):
-        self.battery.current_charge = max(0, min(self.battery.capacity, kwh))
-        self.log(f"Battery charge manually set to {self.battery.current_charge:.2f} kWh")
+        """Set battery charge to a specific value in kWh"""
+        # Get current state to access capacity
+        state = self.battery.get_state()
+        # Calculate new charge value (clamped between 0 and capacity)
+        new_charge = max(0, min(state['capacity_kwh'], kwh))
+        # Access the VirtualBattery internal attribute
+        self.battery.current_charge = new_charge
+        self.log(f"Battery charge manually set to {new_charge:.2f} kWh")
