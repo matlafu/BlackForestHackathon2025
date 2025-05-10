@@ -165,3 +165,30 @@ self.set_state("sensor.my_virtual_sensor", state="on", attributes={"friendly_nam
 ```
 
 See the AppDaemon API Reference for more details.
+
+# AppDaemon Posting Data to Custom Dashboard API
+
+AppDaemon apps can send data to external dashboards or services by making HTTP requests (e.g., POST) to a REST API endpoint. This allows for decoupled, real-time updates from Home Assistant to any custom dashboard or service.
+
+## Example: Posting Sensor Data to a Dashboard API
+```python
+import requests
+
+def state_changed(self, entity, attribute, old, new, kwargs):
+    data = {
+        "entity_id": entity,
+        "old_value": old,
+        "new_value": new,
+        "timestamp": self.datetime().isoformat()
+    }
+    try:
+        response = requests.post("http://localhost:5000/api/update", json=data)
+        self.log(f"Posted to dashboard: {data} (status: {response.status_code})")
+    except Exception as e:
+        self.log(f"Error posting to dashboard: {e}", level="ERROR")
+```
+
+**Benefits:**
+- Decouples automation logic from the dashboard UI
+- Enables real-time updates to any web service or dashboard
+- Flexible: can be used for logging, analytics, notifications, etc.

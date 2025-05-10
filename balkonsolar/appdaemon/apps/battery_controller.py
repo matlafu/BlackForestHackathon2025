@@ -1,0 +1,95 @@
+import appdaemon.plugins.hass.hassapi as hass
+from virtual_battery import VirtualBattery
+
+class BatteryController(hass.Hass):
+    def initialize(self):
+        self.log("BatteryController initialized! App name: battery_controller")
+        self.pv_app = self.get_app("pv_production_reader")
+        self.consumption_app = self.get_app("household_consumption_reader")
+        self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
+        self.active = False
+        self.current_action = "off"
+        self.current_power = 0.0
+        self.run_every(self.manage_battery, self.datetime(), 60)
+
+    def manage_battery(self, kwargs):
+        pv_power = float(self.pv_app.get_latest_value())
+        grid_power = float(self.consumption_app.get_latest_value())
+        interval_hours = 1/60  # 1 minute interval
+        state = self.battery.get_state()
+        if not self.active:
+            self.current_action = "off"
+            self.current_power = 0.0
+            # Log battery state even when off
+            self.log(
+                f"Battery state: OFF, charge: {state['current_charge_kwh']:.2f}/{state['capacity_kwh']} kWh ({state['percent_full']:.1f}%)"
+            )
+            return
+        if grid_power < 0:
+            # Charging
+            surplus_energy = abs(grid_power) * interval_hours / 1000  # in kWh
+            self.battery.charge(surplus_energy)
+            self.current_action = "charging"
+            self.current_power = abs(grid_power)
+        elif grid_power > 0:
+            # Discharging
+            deficit_energy = grid_power * interval_hours / 1000  # in kWh
+            discharged = self.battery.discharge(deficit_energy)
+            self.current_action = "discharging" if discharged > 0 else "idle"
+            self.current_power = grid_power if discharged > 0 else 0.0
+        else:
+            self.current_action = "idle"
+            self.current_power = 0.0
+        state = self.battery.get_state()
+        # Auto turn-off if fully charged or discharged
+        if state['current_charge_kwh'] >= state['capacity_kwh']:
+            self.active = False
+            self.log("Battery fully charged, turning off.")
+        elif state['current_charge_kwh'] <= 0:
+            self.active = False
+            self.log("Battery fully discharged, turning off.")
+        self.log(self._status_log(state))
+
+    def activate_battery(self):
+        self.active = True
+        self.log("Battery ACTIVATED.")
+
+    def deactivate_battery(self):
+        self.active = False
+        self.log("Battery DEACTIVATED.")
+
+    def get_battery_status(self):
+        state = self.battery.get_state()
+        return {
+            "active": self.active,
+            "action": self.current_action,
+            "current_charge_kwh": state["current_charge_kwh"],
+            "capacity_kwh": state["capacity_kwh"],
+            "percent_full": state["percent_full"],
+            "current_power_w": self.current_power,
+            "time_estimate_h": self._estimate_time(state)
+        }
+
+    def _estimate_time(self, state):
+        if self.current_action == "charging" and self.current_power > 0:
+            remaining_kwh = state["capacity_kwh"] - state["current_charge_kwh"]
+            return remaining_kwh / (self.current_power / 1000)
+        elif self.current_action == "discharging" and self.current_power > 0:
+            return state["current_charge_kwh"] / (self.current_power / 1000)
+        else:
+            return None
+
+    def _status_log(self, state):
+        time_est = self._estimate_time(state)
+        time_str = f", est. time to full/empty: {time_est:.2f} h" if time_est is not None else ""
+        return (
+            f"Battery state: {'ON' if self.active else 'OFF'}, "
+            f"action: {self.current_action}, "
+            f"charge: {state['current_charge_kwh']:.2f}/{state['capacity_kwh']} kWh ({state['percent_full']:.1f}%), "
+            f"power: {self.current_power:.1f} W"
+            f"{time_str}"
+        )
+
+    def set_battery_charge(self, kwh):
+        self.battery.current_charge = max(0, min(self.battery.capacity, kwh))
+        self.log(f"Battery charge manually set to {self.battery.current_charge:.2f} kWh")
