@@ -88,4 +88,11 @@ We want to work with Home Assistant as our main Hub that controls the devices an
 - Debugging: Added logs to `initialize()`, checked app names in `apps.yaml`, and handled app availability.
 - Noted that Home Assistant connection errors are unrelated to app logic and are usually transient.
 
+# [2024-05-10] DevOps & Simulation Improvements
+
+- Virtual Environment Management: If venv/ or .venv/ is deleted or broken, recreate with python3.11 -m venv venv and reinstall dependencies. Use .gitignore to exclude venv/ and its subfolders from git tracking. Use git rm -r --cached venv/ to remove venv/ from the repo but keep it locally.
+- AppDaemon & Home Assistant Integration: AppDaemon must be able to connect to Home Assistant and see the correct domains/entities (e.g., light). If an entity is unavailable in Home Assistant, AppDaemon cannot control it. Always check Home Assistant's Developer Tools > States for entity status.
+- Fake Controllers for Testing: fake_controllers.py now contains only "action" classes that trigger/test actions on real device apps (e.g., battery, RGB bulb). The fake RGB bulb controller cycles through red, yellow, and green every 10 seconds for demo/testing.
+- Debugging Tips: If git still shows ignored files, use git rm --cached to untrack them. .gitignore only prevents new files from being tracked, not files already in the repo.
+
 ---
