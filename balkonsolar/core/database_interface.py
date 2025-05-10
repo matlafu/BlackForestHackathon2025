@@ -2,8 +2,8 @@ import sqlite3
 import os
 import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union
-from utils.read_average_energy_consumption import main as read_average_energy_consumption
+from typing import Dict, List, Optional, Any
+import pandas as pd
 
 class DatabaseInterface:
     """
@@ -250,26 +250,9 @@ class DatabaseInterface:
         """
         try:
             conn = self._get_connection()
-            cursor = conn.cursor()
-            
-            # Drop existing table and recreate
-            cursor.execute("DROP TABLE IF EXISTS output_algorithm")
-            cursor.execute("CREATE TABLE IF NOT EXISTS output_algorithm (id INTEGER PRIMARY KEY AUTOINCREMENT, tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, value REAL)")
-            
-            # Insert all rows from DataFrame
-            for _, row in df.iterrows():
-                if timestamp_column and timestamp_column in df.columns:
-                    cursor.execute(
-                        "INSERT INTO output_algorithm (tstamp, value) VALUES (?, ?)",
-                        (row[timestamp_column], row['value'])
-                    )
-                else:
-                    cursor.execute(
-                        "INSERT INTO output_algorithm (value) VALUES (?)",
-                        (row['value'],)
-                    )
-            
-            conn.commit()
+            if timestamp_column and timestamp_column in df.columns:
+                df = df.rename(columns={timestamp_column: "tstamp"})
+            df.to_sql("output_algorithm", conn, if_exists="replace", index=False)
             conn.close()
             return True
         except Exception as e:
