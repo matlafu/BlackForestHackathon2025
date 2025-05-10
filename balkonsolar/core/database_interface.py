@@ -44,6 +44,12 @@ class DatabaseInterface:
         
         self.db_path = db_path
         print(f"DatabaseInterface initialized with database at: {self.db_path}")
+
+    def _get_connection(self):
+        """Get a database connection with row factory enabled"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
     
     def get_latest_value(self, table: str) -> Optional[Dict[str, Any]]:
         """
