@@ -1,2 +1,4 @@
 .cursor/
+.venv/
+*.ipynb
 /balkonsolar/.env
