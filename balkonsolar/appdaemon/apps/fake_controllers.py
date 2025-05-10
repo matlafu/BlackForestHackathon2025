@@ -5,13 +5,13 @@ class FakeBatteryActions(hass.Hass):
         self.run_in(self.fake_activate_and_set_charge, 10)
 
     def fake_activate_and_set_charge(self, kwargs):
-        battery_controller = self.get_app("fake_battery_controller")
+        battery_controller = self.get_app("battery_controller")
         if battery_controller is not None:
             self.log("[FAKE] Activating battery and setting charge to 1.5 kWh")
             battery_controller.activate_battery()
             battery_controller.set_battery_charge(1.5)
         else:
-            self.log("[FAKE] fake_battery_controller app not found!")
+            self.log("[FAKE] battery_controller app not found!")
 
 class FakeRGBBulbActions(hass.Hass):
     def initialize(self):

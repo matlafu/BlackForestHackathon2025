@@ -1,8 +1,10 @@
 import appdaemon.plugins.hass.hassapi as hass
+from balkonsolar.database_shenanigans.energy_db import EnergyDB
 
 class PVProductionReader(hass.Hass):
     def initialize(self):
         self.sensor = "sensor.8cbfea97f1ec_power"
+        self.energy_db = EnergyDB()
         value = self.get_state(self.sensor)
         try:
             self.latest_value = float(value)
@@ -10,7 +12,13 @@ class PVProductionReader(hass.Hass):
             self.latest_value = 0.0
             self.log(f"Initial value for {self.sensor} is unavailable, setting to 0.0 W")
         self.listen_state(self.state_changed, self.sensor)
-        self.run_every(self.log_current_value, self.datetime(), 60)
+        self.run_every(self.log_pv_power, self.datetime(), 60)
+
+    def log_pv_power(self, kwargs):
+        pv_power = float(self.get_state(self.sensor))
+        timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
+        self.energy_db.store_solar_output(pv_power, timestamp)
+        self.log(f"Logged PV power {pv_power} W to database at {timestamp}")
 
     def state_changed(self, entity, attribute, old, new, kwargs):
         try:
@@ -19,9 +27,6 @@ class PVProductionReader(hass.Hass):
             self.latest_value = 0.0
             self.log(f"New value for {entity} is unavailable, setting to 0.0 W")
         self.log(f"{entity} changed from {old} W to {new} W")
-
-    def log_current_value(self, kwargs):
-        self.log(f"Current value of {self.sensor}: {self.latest_value} W")
 
     def get_latest_value(self):
         return self.latest_value

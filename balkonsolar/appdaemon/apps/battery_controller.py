@@ -1,14 +1,14 @@
 import appdaemon.plugins.hass.hassapi as hass
 from virtual_battery import VirtualBattery
+from balkonsolar.database_shenanigans.energy_db import EnergyDB
 
 class BatteryController(hass.Hass):
     def initialize(self):
         self.log("BatteryController initialized! App name: battery_controller")
         self.pv_app = self.get_app("pv_production_reader")
         self.consumption_app = self.get_app("household_consumption_reader")
-        # Make sure battery is initialized
-        if not hasattr(self, 'battery'):
-            self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
+        self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
+        self.energy_db = EnergyDB()
         self.active = False
         self.current_action = "off"
         self.current_power = 0.0
@@ -28,17 +28,17 @@ class BatteryController(hass.Hass):
             )
             return
         if grid_power < 0:
-            # Charging
             surplus_energy = abs(grid_power) * interval_hours / 1000  # in kWh
             self.battery.charge(surplus_energy)
             self.current_action = "charging"
             self.current_power = abs(grid_power)
+            self.log(f"Battery charged with {surplus_energy:.4f} kWh surplus.")
         elif grid_power > 0:
-            # Discharging
             deficit_energy = grid_power * interval_hours / 1000  # in kWh
             discharged = self.battery.discharge(deficit_energy)
             self.current_action = "discharging" if discharged > 0 else "idle"
             self.current_power = grid_power if discharged > 0 else 0.0
+            self.log(f"Battery discharged by {discharged:.4f} kWh to cover deficit.")
         else:
             self.current_action = "idle"
             self.current_power = 0.0
@@ -51,6 +51,11 @@ class BatteryController(hass.Hass):
             self.active = False
             self.log("Battery fully discharged, turning off.")
         self.log(self._status_log(state))
+        # Log battery status to the database
+        battery_level = self.battery.current_charge  # in kWh
+        timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
+        self.energy_db.store_battery_status(battery_level, timestamp)
+        self.log(f"Logged battery status {battery_level} kWh to database at {timestamp}")
 
     def activate_battery(self):
         self.active = True
