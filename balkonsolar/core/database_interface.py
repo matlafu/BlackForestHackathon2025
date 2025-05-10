@@ -237,6 +237,41 @@ class DatabaseInterface:
         """Store irradiation data value"""
         return self.store_value("irradiation_data", value, timestamp)
     
-    def store_output_algorithm(self, value: float, timestamp: Optional[str] = None) -> bool:
-        """Store output algorithm value"""
-        return self.store_value("output_algorithm", value, timestamp)
+    def store_output_algorithm(self, df, timestamp_column: Optional[str] = None) -> bool:
+        """
+        Replace output_algorithm table with contents of DataFrame
+        
+        Args:
+            df: DataFrame containing the data to store
+            timestamp_column: Optional column name for timestamp data
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            conn = self._get_connection()
+            cursor = conn.cursor()
+            
+            # Drop existing table and recreate
+            cursor.execute("DROP TABLE IF EXISTS output_algorithm")
+            cursor.execute("CREATE TABLE IF NOT EXISTS output_algorithm (id INTEGER PRIMARY KEY AUTOINCREMENT, tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, value REAL)")
+            
+            # Insert all rows from DataFrame
+            for _, row in df.iterrows():
+                if timestamp_column and timestamp_column in df.columns:
+                    cursor.execute(
+                        "INSERT INTO output_algorithm (tstamp, value) VALUES (?, ?)",
+                        (row[timestamp_column], row['value'])
+                    )
+                else:
+                    cursor.execute(
+                        "INSERT INTO output_algorithm (value) VALUES (?)",
+                        (row['value'],)
+                    )
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error replacing output_algorithm table: {e}")
+            return False
