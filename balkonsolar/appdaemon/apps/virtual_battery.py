@@ -1,10 +1,19 @@
 class VirtualBattery:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(VirtualBattery, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self, capacity_kwh=2.560, initial_charge_kwh=0.0, charge_efficiency=0.95, discharge_efficiency=0.95):
-        self.capacity = capacity_kwh  # in kWh
-        self.current_charge = initial_charge_kwh  # in kWh
-        self.charge_efficiency = charge_efficiency
-        self.discharge_efficiency = discharge_efficiency
-        self.discharge_enabled = False
+        # Only initialize once
+        if not hasattr(self, "_initialized"):
+            self.capacity = capacity_kwh  # in kWh
+            self.current_charge = initial_charge_kwh  # in kWh
+            self.charge_efficiency = charge_efficiency
+            self.discharge_efficiency = discharge_efficiency
+            self.discharge_enabled = False
 
     def charge(self, amount_kwh):
         # Only allow up to capacity
