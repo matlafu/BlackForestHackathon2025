@@ -243,7 +243,7 @@ class DatabaseInterface:
         """Store irradiation data value"""
         return self.store_value("irradiation_data", value, timestamp)
     
-    def store_output_algorithm(self, df, timestamp_column: Optional[str] = None) -> bool:
+    def store_output_algorithm(self, df) -> bool:
         """
         Replace output_algorithm table with contents of DataFrame
         
@@ -256,11 +256,22 @@ class DatabaseInterface:
         """
         try:
             conn = self._get_connection()
-            if timestamp_column and timestamp_column in df.columns:
-                df = df.rename(columns={timestamp_column: "tstamp"})
             df.to_sql("output_algorithm", conn, if_exists="replace", index=False)
             conn.close()
             return True
         except Exception as e:
             print(f"Error replacing output_algorithm table: {e}")
+            return False
+    
+    def store_grid_usage_forecast(self, df) -> bool:
+        """
+        Replace grid_usage_forecast table with contents of DataFrame
+        """
+        try:
+            conn = self._get_connection()
+            df.to_sql("grid_usage_forecast", conn, if_exists="replace", index=False)
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error replacing grid_usage_forecast table: {e}")
             return False
