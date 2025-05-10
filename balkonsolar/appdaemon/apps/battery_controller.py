@@ -55,6 +55,8 @@ class BatteryController(hass.Hass):
         elif state['current_charge_kwh'] <= 0:
             self.active = False
             self.log("Battery fully discharged, turning off.")
+        # Log the current charge to the database
+        self.set_battery_charge(int(state['current_charge_kwh']))
         self.log(self._status_log(state))
         
         # Log solar, battery, and grid data to the database
