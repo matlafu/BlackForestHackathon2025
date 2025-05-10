@@ -6,7 +6,7 @@ Example script demonstrating how to use the energy database
 import time
 import random
 import datetime
-from balkonsolar.database_shenanigans.create_energy_db import create_energy_database
+from balkonsolar.data.create_energy_db import create_energy_database
 from balkonsolar.database_shenanigans.energy_db import EnergyDB
 
 def add_sample_data():
