@@ -3,6 +3,7 @@ import os
 import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Union
+from utils.read_average_energy_consumption import main as read_average_energy_consumption
 
 class DatabaseInterface:
     """
@@ -235,3 +236,7 @@ class DatabaseInterface:
     def store_irradiation_data(self, value: float, timestamp: Optional[str] = None) -> bool:
         """Store irradiation data value"""
         return self.store_value("irradiation_data", value, timestamp)
+    
+    def store_output_algorithm(self, value: float, timestamp: Optional[str] = None) -> bool:
+        """Store output algorithm value"""
+        return self.store_value("output_algorithm", value, timestamp)

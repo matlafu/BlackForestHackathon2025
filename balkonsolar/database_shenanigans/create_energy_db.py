@@ -49,7 +49,14 @@ def create_energy_database(db_path="energy_data.db"):
             tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             value REAL NOT NULL
         )
+        """,
         """
+            CREATE TABLE IF NOT EXISTS irradiation_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                value REAL NOT NULL
+            )
+            """
     ]
     
     # Execute each table creation query
