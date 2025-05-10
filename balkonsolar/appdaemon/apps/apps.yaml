@@ -1,0 +1,7 @@
+hello_world:
+  module: hello_world
+  class: HelloWorld
+
+read_shelly_energy:
+  module: read_sensor
+  class: ReadShellyEnergy

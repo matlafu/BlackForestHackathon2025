@@ -1,0 +1,2 @@
+[console_scripts]
+appdaemon = appdaemon.__main__:main
