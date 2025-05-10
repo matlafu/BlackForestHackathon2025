@@ -16,9 +16,37 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
+from datetime import datetime, timedelta
 
+def forecast_to_array(forecast: list[dict], resolution_minutes: int = 60) -> list[int]:
+    """
+    Converts forecast states into an array of hourly values.
+    
+    Args:
+        forecast: List of forecast intervals with "from", "to", and "state".
+        resolution_minutes: How often to sample the forecast (default: 60 mins).
+        
+    Returns:
+        List of state values at each sampled time point.
+    """
+    if not forecast:
+        return []
 
-
+    # Parse the full range
+    start = datetime.fromisoformat(forecast[0]["from"])
+    end = datetime.fromisoformat(forecast[-1]["to"])
+    output = []
+    
+    # Sample time points at the given resolution
+    current = start
+    while current < end:
+        matched = next((entry for entry in forecast
+                        if datetime.fromisoformat(entry["from"]) <= current < datetime.fromisoformat(entry["to"])),
+                       None)
+        output.append(matched["state"] if matched else None)
+        current += timedelta(minutes=resolution_minutes)
+    
+    return output
 
 
 async def main():
