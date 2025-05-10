@@ -239,9 +239,16 @@ class DatabaseInterface:
             print(f"Error storing value in {table}: {e}")
             return False
         
-    def store_irradiation_data(self, value: float, timestamp: Optional[str] = None) -> bool:
+    def store_irradiation_data(self, df) -> bool:
         """Store irradiation data value"""
-        return self.store_value("irradiation_data", value, timestamp)
+        try:
+            conn = self._get_connection()
+            df.to_sql("irradiation_data", conn, if_exists="replace", index=False)
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error replacing grid_usage_forecast table: {e}")
+            return False
     
     def store_output_algorithm(self, df) -> bool:
         """
