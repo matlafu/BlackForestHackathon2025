@@ -2,9 +2,9 @@ household_consumption_reader:
   module: household_consumption_reader
   class: HouseholdConsumptionReader
 
-random_bulb_color:
-  module: write_data
-  class: RandomBulbColor
+rgb_bulb:
+  module: rgb_bulb
+  class: RGBBulb
 
 # post_to_dashboard:
 #   module: post_to_dashboard
@@ -15,10 +15,10 @@ pv_production_reader:
   class: PVProductionReader
   dashboard_url: "http://dummy-dashboard.local/api/update"
 
-battery_controller:
-  module: battery_controller
-  class: BatteryController
+fake_battery_actions:
+  module: fake_controllers
+  class: FakeBatteryActions
 
-fake_battery_controller:
-  module: fake_battery_controller
-  class: FakeBatteryController
+fake_rgb_bulb_actions:
+  module: fake_controllers
+  class: FakeRGBBulbActions
