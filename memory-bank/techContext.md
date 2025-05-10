@@ -54,6 +54,39 @@
    - End-to-end tests
    - Performance tests
 
+4. **Local Development Setup for AppDaemon**
+   - **Prerequisites:**
+     - Python 3.11+
+     - Docker and Docker Compose (optional, for local testing)
+     - Home Assistant instance running on a Raspberry Pi (in a separate network, connected to the internet)
+     - Home Assistant Cloud (Nabu Casa) subscription for secure remote access
+     - AppDaemon installed (can be in a virtual environment or container)
+   - **Setup Notes:**
+     - Home Assistant is not running locally, but on a Raspberry Pi in a different network. Communication is established via Home Assistant Cloud (Nabu Casa), which provides secure remote access.
+   - **Steps:**
+     1. Ensure your Home Assistant instance is running on the Raspberry Pi and is connected to Home Assistant Cloud (Nabu Casa).
+     2. Obtain your Home Assistant Cloud remote URL from the Home Assistant UI (Settings > Home Assistant Cloud > Remote Control).
+     3. Install AppDaemon: `pip install appdaemon` (or use Docker)
+     4. Configure AppDaemon to connect to Home Assistant Cloud by editing `appdaemon.yaml`:
+        ```yaml
+        appdaemon:
+          latitude: YOUR_LAT
+          longitude: YOUR_LONG
+          elevation: YOUR_ELEVATION
+          time_zone: YOUR_TIMEZONE
+        hass:
+          url: "https://<your-nabu-casa-remote-url>"
+          token: "YOUR_LONG_LIVED_ACCESS_TOKEN"
+        ```
+        - Use the Nabu Casa remote URL (e.g., `https://<random-string>.ui.nabu.casa`) as the Home Assistant URL.
+        - The long-lived access token must be generated in Home Assistant (Profile > Long-Lived Access Tokens).
+     5. Run AppDaemon: `appdaemon -c /path/to/your/appdaemon/config`
+     6. Develop and test your automation apps in the `apps/` directory. Changes are picked up automatically.
+   - **References:**
+     - [AppDaemon Docs](https://appdaemon.readthedocs.io/en/latest/)
+     - [Home Assistant Cloud (Nabu Casa)](https://www.nabucasa.com/)
+     - [Home Assistant Docs](https://www.home-assistant.io/docs/)
+
 ## Dependencies
 ### Backend Dependencies
 - fastapi==0.104.1
@@ -101,3 +134,34 @@ Refer to the Minimum Viable Product (MVP) section in productContext.md for the c
 - Initial implementation of simple rule-based (if-then) logic for optimization, with plans for linear optimization in later stages.
 - Hardware interaction for battery charging/discharging, device switching, and signaling.
 - User interface to display recommendations, available charge, and algorithmic reasoning.
+
+# AppDaemon ↔ Home Assistant Integration
+
+AppDaemon apps can interact with Home Assistant via the HASS plugin. Key capabilities include:
+
+## Reading Entity State
+```python
+state = self.get_state("sensor.living_room_temperature")
+self.log(f"Living room temperature is {state}")
+```
+
+## Listening for State Changes
+```python
+def initialize(self):
+    self.listen_state(self.my_callback, "light.living_room")
+
+def my_callback(self, entity, attribute, old, new, kwargs):
+    self.log(f"{entity} changed from {old} to {new}")
+```
+
+## Calling Services (e.g., turn on a light)
+```python
+self.call_service("light/turn_on", entity_id="light.living_room")
+```
+
+## Setting AppDaemon-only State
+```python
+self.set_state("sensor.my_virtual_sensor", state="on", attributes={"friendly_name": "My Virtual Sensor"})
+```
+
+See the AppDaemon API Reference for more details.
