@@ -2,9 +2,12 @@
 .venv/
 *.ipynb
 /balkonsolar/.env
-__pycache__/
-*/__pycache__/
+__pycache__/*
+__pycache__
+*/__pycache__/*
 */.env
 *.env
 venv/*
+.envrc
+memory-bank/
 .envrc
