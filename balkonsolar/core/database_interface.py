@@ -239,46 +239,31 @@ class DatabaseInterface:
             print(f"Error storing value in {table}: {e}")
             return False
         
-    def store_irradiation_data(self, df) -> bool:
-        """Store irradiation data value"""
+    def overwrite_table(self, df, table_name: str) -> bool:
+        """
+        Replace a table with contents of DataFrame
+        """
         try:
             conn = self._get_connection()
-            df.to_sql("irradiation_data", conn, if_exists="replace", index=False)
+            df.to_sql(table_name, conn, if_exists="replace", index=False)
             conn.close()
             return True
         except Exception as e:
-            print(f"Error replacing grid_usage_forecast table: {e}")
+            print(f"Error replacing {table_name} table: {e}")
             return False
+        
+    def store_irradiation_data(self, df) -> bool:
+        """Store irradiation data value"""
+        return self.overwrite_table(df, "irradiation_data")
     
     def store_output_algorithm(self, df) -> bool:
         """
         Replace output_algorithm table with contents of DataFrame
-        
-        Args:
-            df: DataFrame containing the data to store
-            timestamp_column: Optional column name for timestamp data
-            
-        Returns:
-            True if successful, False otherwise
         """
-        try:
-            conn = self._get_connection()
-            df.to_sql("output_algorithm", conn, if_exists="replace", index=False)
-            conn.close()
-            return True
-        except Exception as e:
-            print(f"Error replacing output_algorithm table: {e}")
-            return False
+        return self.overwrite_table(df, "output_algorithm")
     
     def store_grid_usage_forecast(self, df) -> bool:
         """
         Replace grid_usage_forecast table with contents of DataFrame
         """
-        try:
-            conn = self._get_connection()
-            df.to_sql("grid_usage_forecast", conn, if_exists="replace", index=False)
-            conn.close()
-            return True
-        except Exception as e:
-            print(f"Error replacing grid_usage_forecast table: {e}")
-            return False
+        return self.overwrite_table(df, "grid_usage_forecast")
