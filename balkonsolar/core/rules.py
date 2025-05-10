@@ -24,8 +24,6 @@ Returns:
 
 USER_SOLAR_HIGH_THRESHOLD = 0.50
 STROMGEDACHT_HIGH_THRESHOLD = 1
-BATTERY_HIGH_THRESHOLD = 0.80
-
 
 
 def determine_balkonsolar_state(
@@ -34,8 +32,8 @@ def determine_balkonsolar_state(
     current_battery_percent, # we get this from moritz, 
     # from the virtual battery class, in percentage
     max_solar_capacity,
-    max_battery_percent, # we get this from user
-    min_battery_percent # we get this from user
+    battery_high_threshold = 0.8, # we get this from user
+    min_battery_percent = 0.25 # we get this from user
 ):
     # Define thresholds for solar production (high if > 50% of maximum capacity)
     solar_high_threshold = USER_SOLAR_HIGH_THRESHOLD * max_solar_capacity
@@ -43,7 +41,7 @@ def determine_balkonsolar_state(
     # Convert raw values to binary states
     is_grid_demand_high = grid_demand > STROMGEDACHT_HIGH_THRESHOLD  # Stromgedacht API: 0=low, 1 or 2=high
     is_solar_production_high = solar_production > solar_high_threshold
-    is_battery_filled = current_battery_percent >= BATTERY_HIGH_THRESHOLD * max_battery_percent  # 90% threshold
+    is_battery_filled = current_battery_percent >= battery_high_threshold
     is_battery_low = current_battery_percent < min_battery_percent
 
     # Implementation of the truth table from the image
@@ -61,15 +59,15 @@ def determine_balkonsolar_state(
     # Logic implementation based on the truth table and requirements
     if is_solar_production_high:
         if is_battery_filled:
-            return 0  # Use solar to power household
+            return 0
         else:
-            return 1  # Charge battery from solar
+            return 1
     else:
         # Solar production is low
         if is_battery_low or not is_grid_demand_high:
-            return 3  # Use grid to power household
+            return 3
         else:
-            return 2  # Use battery to power household
+            return 2
 
 
 # USAGE
