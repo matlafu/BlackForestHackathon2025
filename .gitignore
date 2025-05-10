@@ -11,3 +11,4 @@ venv/*
 .envrc
 memory-bank/
 .envrc
+test*
