@@ -9,7 +9,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from diskcache import Cache
-from core.database_interface import DatabaseInterface
+from ..core.database_interface import DatabaseInterface
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class ForecastSolarClient():
             return {}
 
     async def get_watt_hours(self) -> dict:
-        forecast = await  client.get_forecast()
+        forecast = await self.get_forecast()
         watt_hour_forecast = forecast["watt_hours"]
         format = "%Y-%m-%d %H:%M:%S"
         return { datetime.strptime(timestamp, format): watts for (timestamp, watts) in
