@@ -2,6 +2,20 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from balkonsolar.core.database_interface import DatabaseInterface
+from balkonsolar.utils.read_average_energy_consumption import main as read_average_energy_consumption
+
+# Initialize database interface
+db = DatabaseInterface()
+
+# Get irradiation forecast
+irradiation_forecast = db.get_irradiation_forecast()
+
+# Get grid usage forecast
+grid_usage_forecast = db.get_grid_usage_forecast()
+
+# Get average grid usage for the next 24 hours
+average_grid_usage = read_average_energy_consumption()
+
 
 # Create a mock DataFrame for the next 24 hours
 hours = pd.date_range(start=datetime.now().replace(minute=0, second=0, microsecond=0), periods=24, freq='H')
@@ -67,5 +81,5 @@ for idx, row in df.iterrows():
 # Drop helper column before presenting
 df.drop(columns=["surplus"], inplace=True)
 
-db = DatabaseInterface()
+
 db.store_output_algorithm(df)

@@ -137,7 +137,7 @@ class DatabaseInterface:
         result = self.get_latest_value("grid_usage")
         return result["value"] if result else 0.0
     
-    def get_history(self, table: str, hours: int = 24) -> List[Dict[str, Any]]:
+    def get_history(self, table: str, hours: int|None = None) -> List[Dict[str, Any]] | pd.DataFrame:
         """
         Get history for a specific table
         
@@ -161,25 +161,34 @@ class DatabaseInterface:
             if not cursor.fetchone():
                 conn.close()
                 return []
+
+            if hours is not None:
+                # Calculate the timestamp for the start of the period
+                start_time = (datetime.datetime.now() - datetime.timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
+                
+                cursor.execute(
+                    f"SELECT id, tstamp, value FROM {table} WHERE tstamp >= ? ORDER BY tstamp DESC",
+                    (start_time,)
+                )
+                results = []
+                for row in cursor.fetchall():
+                    results.append({
+                        "id": row["id"],
+                        "timestamp": row["tstamp"],
+                        "value": row["value"]
+                    })
+                
+                conn.close()
+                return results
+            else:
+                cursor.execute(
+                    f"SELECT * FROM {table};"
+                )
+                df = pd.DataFrame(cursor.fetchall(), columns=[i[0] for i in cursor.description])
+                conn.close()
+                return df
             
-            # Calculate the timestamp for the start of the period
-            start_time = (datetime.datetime.now() - datetime.timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
-            
-            cursor.execute(
-                f"SELECT id, tstamp, value FROM {table} WHERE tstamp >= ? ORDER BY tstamp DESC",
-                (start_time,)
-            )
-            
-            results = []
-            for row in cursor.fetchall():
-                results.append({
-                    "id": row["id"],
-                    "timestamp": row["tstamp"],
-                    "value": row["value"]
-                })
-            
-            conn.close()
-            return results
+
         except Exception as e:
             print(f"Error getting history from {table}: {e}")
             return []
@@ -204,6 +213,14 @@ class DatabaseInterface:
     def get_grid_history(self, hours: int = 24) -> List[Dict[str, Any]]:
         """Get grid usage history"""
         return self.get_history("grid_usage", hours) 
+    
+    def get_grid_usage_forecast(self) -> List[Dict[str, Any]]:
+        """Get grid usage forecast"""
+        return self.get_history("grid_usage_forecast")
+    
+    def get_irradiation_forecast(self) -> List[Dict[str, Any]]:
+        """Get irradiation forecast"""
+        return self.get_history("irradiation_data")
     
     def store_value(self, table: str, value: float, timestamp: Optional[str] = None) -> bool:
         """
