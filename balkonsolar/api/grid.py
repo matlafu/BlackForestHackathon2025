@@ -4,6 +4,7 @@ Grid demand API client for StromGedacht and OpenGridMap.
 import requests
 from typing import Optional
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -42,29 +43,48 @@ class StromGedachtClient():
             4 : 'Verbrauch reduzieren, um Strommangel zu verhindern'
         }
 
-    async def get_stromgedacht_mapping(
+    async def get_stromgedacht_api_response(self) -> dict:
+        '''
+        Get the response from the StromGedacht API.
+        : return: The response from the StromGedacht API as a dictionary
+        '''
+        params = {
+            "zip": self.zip_code
+        }
+        response = requests.get(self.base_url, params=params)
+        return response.json()
+    
+    async def get_stromgedacht_mapping_integer(
         self,
-        zip_code: Optional[int|None] = None
+    ) -> int|None:
+        '''
+        Get the mapping of the StromGedacht API.
+        : return: The mapping of the StromGedacht API as an integer
+        '''
+        logger.info(f"Getting StromGedacht integer mapping for zip code: {self.zip_code}")
+        response = await self.get_stromgedacht_api_response()
+        try:
+            return response.json()["state"]
+        except Exception as e:
+            logger.error(f"Error getting StromGedacht integer mapping for zip code: {self.zip_code}. Error: {e}")
+            return None
+
+    async def get_stromgedacht_mapping_state(
+        self,
     ) -> str:
         """
         Get the mapping of the Strom Gedacht API.
-        : params: zip_code: The zip code of the location to get the grid load for
         : return: The mapping of the Strom Gedacht API as a string
         """
-        # Use the base zip code if not provided
-        zip_code = self.zip_code if zip_code is None else zip_code
-        params = {
-            "zip": zip_code
-        }
-        logger.info(f"Getting StromGedacht mapping for zip code: {zip_code}")
-        response = requests.get(self.base_url, params=params)
+        logger.info(f"Getting StromGedacht mapping for zip code: {self.zip_code}")
+        response = await self.get_stromgedacht_api_response()
         mappings = await self.get_stromgedacht_mapping_german()
         try:
             response_state = response.json()["state"]
-            logger.info(f"StromGedacht mapping for zip code: {zip_code} is {mappings[response_state]}")
+            logger.info(f"StromGedacht mapping for zip code: {self.zip_code} is {mappings[response_state]}")
             return mappings[response_state]
         except Exception as e:
-            logger.error(f"Error getting StromGedacht mapping for zip code: {zip_code}. Error: {e}")
+            logger.error(f"Error getting StromGedacht mapping for zip code: {self.zip_code}. Error: {e}")
             return "Ungültige Postleitzahl"
     
 
