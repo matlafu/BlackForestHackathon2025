@@ -2,7 +2,7 @@
 Grid demand API client for StromGedacht and OpenGridMap.
 """
 import requests
-from typing import Dict, Optional
+from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,15 @@ class StromGedachtClient():
             3 : 'Reduce consumption (save cost & CO2)',
             4 : 'Reduce consumption (prevent power shortfalls)'
         }
+    
+    @staticmethod
+    async def get_stromgedacht_mapping_german():
+        return {
+            -1 : 'Strom jetzt nutzen, um die Netzdienlichkeit zu unterstützen',
+            1 : 'Normalbetrieb – Du musst nichts weiter tun',
+            3 : 'Verbrauch reduzieren, um Kosten und CO2 zu sparen',
+            4 : 'Verbrauch reduzieren, um Strommangel zu verhindern'
+        }
 
     async def get_stromgedacht_mapping(
         self,
@@ -49,10 +58,13 @@ class StromGedachtClient():
         }
         logger.info(f"Getting StromGedacht mapping for zip code: {zip_code}")
         response = requests.get(self.base_url, params=params)
-        mappings = await self.get_stromgedacht_mapping()
+        mappings = await self.get_stromgedacht_mapping_german()
         try:
-            logger.info(f"StromGedacht mapping for zip code: {zip_code} is {mappings[response.get('state')]}")
-            return mappings[response.get("state")]
+            response_state = response.json()["state"]
+            logger.info(f"StromGedacht mapping for zip code: {zip_code} is {mappings[response_state]}")
+            return mappings[response_state]
         except Exception as e:
             logger.error(f"Error getting StromGedacht mapping for zip code: {zip_code}. Error: {e}")
-            raise e
+            return "Ungültige Postleitzahl"
+    
+
