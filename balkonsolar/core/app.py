@@ -30,8 +30,8 @@ def run_balkonsolar_advisor():
     try:
         # For demonstration purposes, simulate current values
         # In a real implementation, you would fetch these from sensors or APIs
-        current_solar_production = 250
-        current_battery_percent = battery.get_battery_status()["percent_full"]
+        current_solar_production = 250 #get from Db
+        current_battery_capacity = 1500 #get from DB
         
         # Get grid demand from API based on zip code
         print(f"\nFetching grid demand data for ZIP code {zip_code}...")
@@ -41,7 +41,8 @@ def run_balkonsolar_advisor():
         state = determine_balkonsolar_state(
             current_grid_demand,
             current_solar_production,
-            current_battery_percent,
+            max_battery_capacity,
+            current_battery_capacity,
             max_solar_capacity,
             min_battery_percent,
         )
@@ -49,8 +50,8 @@ def run_balkonsolar_advisor():
         # Display system status and recommendation
         print("\n===== System Status =====")
         print(f"Solar Production: {current_solar_production}W / {max_solar_capacity}W")
-        print(f"Battery Charge: {current_battery_percent} / {max_battery_capacity}Wh " + 
-              f"({int(current_battery_percent/max_battery_capacity*100)}%)")
+       # print(f"Battery Charge: {current_battery_percent} / {max_battery_capacity}Wh " + 
+             # f"({int(current_battery_percent/max_battery_capacity*100)}%)")
         
         print("\n===== Recommendation =====")
         print(f"Optimal state: {state}")

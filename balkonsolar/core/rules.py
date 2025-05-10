@@ -29,15 +29,15 @@ STROMGEDACHT_HIGH_THRESHOLD = 1
 def determine_balkonsolar_state(
     grid_demand,
     solar_production,
-    current_battery_percent, # we get this from moritz, 
-    # from the virtual battery class, in percentage
-    max_solar_capacity,
+    max_battery_capacity, # get from user
+    current_battery_capacity, # we get this from moritz, 
+    max_solar_capacity, #user
     battery_high_threshold = 0.8, # we get this from user
     min_battery_percent = 0.25 # we get this from user
 ):
     # Define thresholds for solar production (high if > 50% of maximum capacity)
     solar_high_threshold = USER_SOLAR_HIGH_THRESHOLD * max_solar_capacity
-    
+    current_battery_percent = current_battery_capacity/max_battery_capacity
     # Convert raw values to binary states
     is_grid_demand_high = grid_demand > STROMGEDACHT_HIGH_THRESHOLD  # Stromgedacht API: 0=low, 1 or 2=high
     is_solar_production_high = solar_production > solar_high_threshold
