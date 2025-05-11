@@ -2,7 +2,8 @@ import sqlite3
 import os
 import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
+import pandas as pd
 
 class DatabaseInterface:
     """
@@ -43,6 +44,12 @@ class DatabaseInterface:
         
         self.db_path = db_path
         print(f"DatabaseInterface initialized with database at: {self.db_path}")
+
+    def _get_connection(self):
+        """Get a database connection with row factory enabled"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
     
     def get_latest_value(self, table: str) -> Optional[Dict[str, Any]]:
         """
@@ -130,7 +137,7 @@ class DatabaseInterface:
         result = self.get_latest_value("grid_usage")
         return result["value"] if result else 0.0
     
-    def get_history(self, table: str, hours: int = 24) -> List[Dict[str, Any]]:
+    def get_history(self, table: str, hours: int|None = None) -> List[Dict[str, Any]] | pd.DataFrame:
         """
         Get history for a specific table
         
@@ -154,25 +161,34 @@ class DatabaseInterface:
             if not cursor.fetchone():
                 conn.close()
                 return []
+
+            if hours is not None:
+                # Calculate the timestamp for the start of the period
+                start_time = (datetime.datetime.now() - datetime.timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
+                
+                cursor.execute(
+                    f"SELECT id, tstamp, value FROM {table} WHERE tstamp >= ? ORDER BY tstamp DESC",
+                    (start_time,)
+                )
+                results = []
+                for row in cursor.fetchall():
+                    results.append({
+                        "id": row["id"],
+                        "timestamp": row["tstamp"],
+                        "value": row["value"]
+                    })
+                
+                conn.close()
+                return results
+            else:
+                cursor.execute(
+                    f"SELECT * FROM {table};"
+                )
+                df = pd.DataFrame(cursor.fetchall(), columns=[i[0] for i in cursor.description])
+                conn.close()
+                return df
             
-            # Calculate the timestamp for the start of the period
-            start_time = (datetime.datetime.now() - datetime.timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
-            
-            cursor.execute(
-                f"SELECT id, tstamp, value FROM {table} WHERE tstamp >= ? ORDER BY tstamp DESC",
-                (start_time,)
-            )
-            
-            results = []
-            for row in cursor.fetchall():
-                results.append({
-                    "id": row["id"],
-                    "timestamp": row["tstamp"],
-                    "value": row["value"]
-                })
-            
-            conn.close()
-            return results
+
         except Exception as e:
             print(f"Error getting history from {table}: {e}")
             return []
@@ -197,3 +213,74 @@ class DatabaseInterface:
     def get_grid_history(self, hours: int = 24) -> List[Dict[str, Any]]:
         """Get grid usage history"""
         return self.get_history("grid_usage", hours) 
+    
+    def get_grid_usage_forecast(self) -> List[Dict[str, Any]]:
+        """Get grid usage forecast"""
+        return self.get_history("grid_usage_forecast")
+    
+    def get_irradiation_forecast(self) -> List[Dict[str, Any]]:
+        """Get irradiation forecast"""
+        return self.get_history("irradiation_data")
+    
+    def store_value(self, table: str, value: float, timestamp: Optional[str] = None) -> bool:
+        """
+        Store a value in a specific table
+        
+        Args:
+            table: Table name
+            value: Value to store
+            timestamp: Optional timestamp (if None, current time is used)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            conn = self._get_connection()
+            cursor = conn.cursor()
+            
+            if timestamp:
+                cursor.execute(
+                    f"INSERT INTO {table} (tstamp, value) VALUES (?, ?)",
+                    (timestamp, value)
+                )
+            else:
+                cursor.execute(
+                    f"INSERT INTO {table} (value) VALUES (?)",
+                    (value,)
+                )
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error storing value in {table}: {e}")
+            return False
+        
+    def overwrite_table(self, df, table_name: str) -> bool:
+        """
+        Replace a table with contents of DataFrame
+        """
+        try:
+            conn = self._get_connection()
+            df.to_sql(table_name, conn, if_exists="replace", index=False)
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error replacing {table_name} table: {e}")
+            return False
+        
+    def store_irradiation_data(self, df) -> bool:
+        """Store irradiation data value"""
+        return self.overwrite_table(df, "irradiation_data")
+    
+    def store_output_algorithm(self, df) -> bool:
+        """
+        Replace output_algorithm table with contents of DataFrame
+        """
+        return self.overwrite_table(df, "output_algorithm")
+    
+    def store_grid_usage_forecast(self, df) -> bool:
+        """
+        Replace grid_usage_forecast table with contents of DataFrame
+        """
+        return self.overwrite_table(df, "grid_usage_forecast")

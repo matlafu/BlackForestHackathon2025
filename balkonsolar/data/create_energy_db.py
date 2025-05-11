@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-def create_energy_database(db_path="energy_data.db"):
+def create_energy_database(db_path="balkonsolar/data/energy_data.db"):
     """Create a SQLite database with tables for energy monitoring"""
     
     # Ensure directory exists if needed
@@ -49,6 +49,21 @@ def create_energy_database(db_path="energy_data.db"):
             tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             value REAL NOT NULL
         )
+        """,
+        """
+            CREATE TABLE IF NOT EXISTS irradiation_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                value REAL NOT NULL
+            )
+            """,
+        # Grid usage forecast
+        """
+        CREATE TABLE IF NOT EXISTS grid_usage_forecast (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tstamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            value REAL NOT NULL
+        )
         """
     ]
     
@@ -61,7 +76,9 @@ def create_energy_database(db_path="energy_data.db"):
         "CREATE INDEX IF NOT EXISTS idx_solar_tstamp ON solar_output(tstamp)",
         "CREATE INDEX IF NOT EXISTS idx_battery_tstamp ON battery_storage_status(tstamp)",
         "CREATE INDEX IF NOT EXISTS idx_grid_tstamp ON grid_usage(tstamp)",
-        "CREATE INDEX IF NOT EXISTS idx_algo_tstamp ON output_algorithm(tstamp)"
+        "CREATE INDEX IF NOT EXISTS idx_algo_tstamp ON output_algorithm(tstamp)",
+        "CREATE INDEX IF NOT EXISTS idx_irradiation_tstamp ON irradiation_data(tstamp)",
+        "CREATE INDEX IF NOT EXISTS idx_grid_forecast_tstamp ON grid_usage_forecast(tstamp)"
     ]
     
     for index_query in indexes:
