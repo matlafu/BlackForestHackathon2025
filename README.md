@@ -1,6 +1,6 @@
-# BalkonSolar
+# UnQuack! 
 
-Optimizing Small-Scale Storage and Plug-In Solar for Grid Stability and Cost Savings
+Optimizing Small-Scale Storage and Plug-In Solar for Grid Stability and Cost Savings.
 
 ## Overview
 
