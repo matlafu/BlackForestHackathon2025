@@ -19,7 +19,6 @@ def store_solar_production_predictions():
         azimuth=0,
         kwp=0.8,
     )
-    print(asyncio.run(client.get_forecast()).keys())
     watt_hours_dict = asyncio.run(client.get_watt_hours())
     watt_hours_df = pd.DataFrame(list(watt_hours_dict.items())).rename(columns={0: "timestamp", 1: "watt_hours"})
     watt_hours_df = watt_hours_df.sort_values(by="timestamp")
@@ -71,7 +70,7 @@ def __full_hours_in_interval(
 
 
 def store_grid_state_predictions():
-    client = StromGedachtClient(zip_code=70173)
+    client = StromGedachtClient(zip_code=79110)
     grid_forecast = asyncio.run(client.get_forecast())
 
     state_array = __grid_forecast_to_array(grid_forecast)
