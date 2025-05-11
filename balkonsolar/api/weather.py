@@ -2,6 +2,8 @@
 Weather API client for OpenWeatherMap.
 """
 import os
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="balkonsolar/.env")
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
@@ -29,7 +31,7 @@ class OpenWeatherMapClient(BaseAPIClient):
         """
         super().__init__(
             base_url="https://api.openweathermap.org/data/2.5",
-            api_key=api_key,
+            api_key=api_key or os.getenv("OPENWEATHERMAP_API_KEY"),
             timeout=timeout,
             cache_ttl=cache_ttl,
         )

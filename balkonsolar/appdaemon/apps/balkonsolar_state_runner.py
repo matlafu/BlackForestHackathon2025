@@ -5,7 +5,7 @@ from balkonsolar.database_shenanigans.energy_db import EnergyDB
 class BalkonsolarStateRunner(hass.Hass):
     def initialize(self):
         self.energy_db = EnergyDB()
-        self.run_every(self.run_algorithm_and_store, self.datetime(), 300)  # every 5 minutes
+        self.run_every(self.run_algorithm_and_store, self.datetime(), 900)  # every 15 minutes
 
     def run_algorithm_and_store(self, kwargs):
         result = determine_balkonsolar_state()

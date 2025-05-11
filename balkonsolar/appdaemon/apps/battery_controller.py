@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="balkonsolar/.env")
 import appdaemon.plugins.hass.hassapi as hass
 from virtual_battery import VirtualBattery
 from database_utils import DatabaseManager
@@ -8,12 +11,12 @@ class BatteryController(hass.Hass):
         self.pv_app = self.get_app("pv_production_reader")
         self.consumption_app = self.get_app("household_consumption_reader")
         self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
-        
-        # Initialize database with path from config
-        db_path = self.args.get("db_path", None)  # None will use the default path
+
+        # Initialize database with path from config or environment
+        db_path = self.args.get("db_path") or os.getenv("DB_PATH")  # None will use the default path in DatabaseManager
         self.db_manager = DatabaseManager(db_path)
         self.log(f"Database initialized at {self.db_manager.db_path}")
-        
+
         self.active = False
         self.current_action = "off"
         self.current_power = 0.0
@@ -58,7 +61,7 @@ class BatteryController(hass.Hass):
         # Log the current charge to the database
         self.set_battery_charge(int(state['current_charge_kwh']))
         self.log(self._status_log(state))
-        
+
         # Log solar, battery, and grid data to the database
         timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
         self.db_manager.store_battery_status(self.battery.current_charge, timestamp)
@@ -115,7 +118,7 @@ class BatteryController(hass.Hass):
         # Access the VirtualBattery internal attribute
         self.battery.current_charge = new_charge
         self.log(f"Battery charge manually set to {new_charge:.2f} kWh")
-        
+
         # Log the manual change to the database
         timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
         self.log(f"Logging battery charge {new_charge} kWh to database at {timestamp}")

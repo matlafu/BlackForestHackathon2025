@@ -8,6 +8,9 @@ from typing import Any, Dict, Optional, Union
 import httpx
 from loguru import logger
 from tenacity import retry, stop_after_attempt, wait_exponential
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="balkonsolar/.env")
 
 class BaseAPIClient:
     """Base class for all API clients with common functionality."""
@@ -31,7 +34,7 @@ class BaseAPIClient:
             cache_ttl: Cache TTL in seconds
         """
         self.base_url = base_url.rstrip('/')
-        self.api_key = api_key or os.environ.get(f"{self.__class__.__name__.upper()}_API_KEY")
+        self.api_key = api_key or os.getenv(f"{self.__class__.__name__.upper()}_API_KEY")
         self.timeout = timeout
         self.max_retries = max_retries
         self.cache_ttl = cache_ttl

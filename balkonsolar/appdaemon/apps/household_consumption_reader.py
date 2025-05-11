@@ -1,14 +1,17 @@
+import os
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="balkonsolar/.env")
 import appdaemon.plugins.hass.hassapi as hass
 from database_utils import DatabaseManager
 
 class HouseholdConsumptionReader(hass.Hass):
     def initialize(self):
         self.entity_id = "sensor.shellypro3em63_fce8c0dad39c_total_active_power"
-        # Initialize database with path from config
-        db_path = self.args.get("db_path", None)  # None will use the default path
+        # Initialize database with path from config or environment
+        db_path = self.args.get("db_path") or os.getenv("DB_PATH")  # None will use the default path in DatabaseManager
         self.db_manager = DatabaseManager(db_path)
         self.log(f"Database initialized at {self.db_manager.db_path}")
-        
+
         value = self.get_state(self.entity_id)
         try:
             self.latest_value = float(value)

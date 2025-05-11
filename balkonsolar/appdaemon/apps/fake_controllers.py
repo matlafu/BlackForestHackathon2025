@@ -7,9 +7,12 @@ class FakeBatteryActions(hass.Hass):
     def fake_activate_and_set_charge(self, kwargs):
         battery_controller = self.get_app("battery_controller")
         if battery_controller is not None:
-            self.log("[FAKE] Activating battery and setting charge to 1.5 kWh")
+            self.log("[FAKE] Activating battery")
             battery_controller.activate_battery()
-            battery_controller.set_battery_charge(1.5)
+            current_charge = battery_controller.get_battery_status().get("current_charge_kwh")
+            if current_charge is None:
+                # if no current charge is available, set it to 1.5 kWh for proper testing
+                battery_controller.set_battery_charge(1.5)
         else:
             self.log("[FAKE] battery_controller app not found!")
 
@@ -18,7 +21,7 @@ class FakeRGBBulbActions(hass.Hass):
         # Red, Yellow, Green
         self.colors = [(255, 0, 0), (255, 255, 0), (0, 255, 0)]
         self.color_index = 0
-        self.run_in(self.fake_bulb_sequence, 10)
+        # self.run_in(self.fake_bulb_sequence, 10)
 
     def fake_bulb_sequence(self, kwargs):
         bulb_app = self.get_app("rgb_bulb")

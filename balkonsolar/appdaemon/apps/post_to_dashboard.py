@@ -1,10 +1,13 @@
+import os
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="balkonsolar/.env")
 import hassapi as hass
 import requests
 
 class PostToDashboard(hass.Hass):
     def initialize(self):
         self.entity_id = "sensor.shellypro3em63_fce8c0dad39c_total_active_energy"
-        self.dashboard_url = "http://localhost:5000/api/update"  # Change to your dashboard API endpoint
+        self.dashboard_url = os.getenv("DASHBOARD_URL", "http://localhost:5000/api/update")  # Use env var if set
         self.listen_state(self.state_changed, self.entity_id)
 
     def state_changed(self, entity, attribute, old, new, kwargs):
