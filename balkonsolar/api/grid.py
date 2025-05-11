@@ -93,8 +93,8 @@ class StromGedachtClient():
         from datetime import datetime, timedelta
         
         now = datetime.now()
-        from_date = now.strftime("%Y-%m-%dT%H:%M:%S")
-        to_date = (now + timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%S")
+        from_date = (now - timedelta(hours=12)).strftime("%Y-%m-%dT%H:%M:%S")
+        to_date = (now + timedelta(hours=36)).strftime("%Y-%m-%dT%H:%M:%S")
         
         params = {
             "zip": self.zip_code,
