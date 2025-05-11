@@ -50,7 +50,7 @@ class FakeRGBBulbActions(hass.Hass):
         if bulb_app is not None:
             # self.log("[FAKE] Turning on RGB bulb")
             bulb_app.turn_on()
-            self.run_in(self.fake_set_color, 2)
+            # self.run_in(self.fake_set_color, 2)
         else:
             self.log("[FAKE] rgb_bulb app not found!")
 

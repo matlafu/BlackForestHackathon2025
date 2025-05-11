@@ -6,7 +6,15 @@ from virtual_battery import VirtualBattery
 from database_utils import DatabaseManager
 
 class BatteryController(hass.Hass):
+    """
+    AppDaemon app that manages a virtual battery, simulates charging/discharging based on energy flows,
+    and logs battery, solar, and grid data to the database. Supports activation, deactivation, and manual charge setting.
+    """
     def initialize(self):
+        """
+        Called once when the app is initialized by AppDaemon.
+        Sets up the PV and consumption apps, initializes the virtual battery and database, and schedules periodic management.
+        """
         self.log("BatteryController initialized! App name: battery_controller")
         self.pv_app = self.get_app("pv_production_reader")
         self.consumption_app = self.get_app("household_consumption_reader")
@@ -23,6 +31,10 @@ class BatteryController(hass.Hass):
         self.run_every(self.manage_battery, self.datetime(), 60)
 
     def manage_battery(self, kwargs):
+        """
+        Simulates battery charging/discharging based on PV production and grid consumption.
+        Logs battery state and energy data to the database every minute.
+        """
         pv_power = float(self.pv_app.get_latest_value())
         grid_power = float(self.consumption_app.get_latest_value())
         interval_hours = 1/60  # 1 minute interval
@@ -70,14 +82,23 @@ class BatteryController(hass.Hass):
         self.log(f"Logged energy data to database at {timestamp}")
 
     def activate_battery(self):
+        """
+        Activates the virtual battery for simulation.
+        """
         self.active = True
         self.log("Battery ACTIVATED.")
 
     def deactivate_battery(self):
+        """
+        Deactivates the virtual battery for simulation.
+        """
         self.active = False
         self.log("Battery DEACTIVATED.")
 
     def get_battery_status(self):
+        """
+        Returns the current status of the virtual battery, including charge, capacity, percent full, and power.
+        """
         state = self.battery.get_state()
         return {
             "active": self.active,
@@ -90,6 +111,9 @@ class BatteryController(hass.Hass):
         }
 
     def _estimate_time(self, state):
+        """
+        Estimates the time to full or empty based on current action and power.
+        """
         if self.current_action == "charging" and self.current_power > 0:
             remaining_kwh = state["capacity_kwh"] - state["current_charge_kwh"]
             return remaining_kwh / (self.current_power / 1000)
@@ -99,6 +123,9 @@ class BatteryController(hass.Hass):
             return None
 
     def _status_log(self, state):
+        """
+        Returns a formatted string summarizing the battery state for logging.
+        """
         time_est = self._estimate_time(state)
         time_str = f", est. time to full/empty: {time_est:.2f} h" if time_est is not None else ""
         return (
@@ -110,7 +137,9 @@ class BatteryController(hass.Hass):
         )
 
     def set_battery_charge(self, kwh):
-        """Set battery charge to a specific value in kWh"""
+        """
+        Sets the battery charge to a specific value in kWh and logs the change to the database.
+        """
         # Get current state to access capacity
         state = self.battery.get_state()
         # Calculate new charge value (clamped between 0 and capacity)

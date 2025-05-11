@@ -8,17 +8,25 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="balkonsolar/.env")
 
+"""
+Database interface for Balkonsolar project.
+
+Provides methods to access, store, and manage energy data (battery, solar, grid, forecasts) in a SQLite database.
+Handles database path resolution, table existence checks, and integrates with pandas for DataFrame operations.
+"""
+
 class DatabaseInterface:
     """
-    Interface for accessing energy data from the shared database
+    Interface for accessing and managing energy data in the shared SQLite database.
+    Provides methods for reading and writing battery, solar, grid, and forecast data.
     """
 
     def __init__(self, db_path: Optional[str] = None):
         """
-        Initialize the database interface
+        Initialize the database interface.
 
         Args:
-            db_path: Optional path to the database. If None, tries to find the default path.
+            db_path: Optional path to the database. If None, tries to find the default path in common locations.
         """
         if db_path is None:
             # Try to find the database in common locations
@@ -49,20 +57,22 @@ class DatabaseInterface:
         print(f"DatabaseInterface initialized with database at: {self.db_path}")
 
     def _get_connection(self):
-        """Get a database connection with row factory enabled"""
+        """
+        Get a database connection with row factory enabled for dict-like row access.
+        """
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
 
     def get_latest_value(self, table: str) -> Optional[Dict[str, Any]]:
         """
-        Get the latest value from a specific table
+        Get the latest value from a specific table.
 
         Args:
-            table: Table name
+            table: Table name to query.
 
         Returns:
-            Dictionary with the latest record or None if no data
+            Dictionary with the latest record or None if no data or table does not exist.
         """
         try:
             if not os.path.exists(self.db_path):
@@ -99,10 +109,10 @@ class DatabaseInterface:
 
     def get_battery_status(self) -> Dict[str, str]:
         """
-        Get the current battery status
+        Get the current battery status (charge and timestamp).
 
         Returns:
-            Dictionary with battery status
+            Dictionary with current charge (kWh) and timestamp.
         """
         result = self.get_latest_value("battery_storage_status")
 
@@ -122,34 +132,34 @@ class DatabaseInterface:
 
     def get_solar_output(self) -> float:
         """
-        Get the latest solar output value
+        Get the latest solar output value.
 
         Returns:
-            Latest solar output value or 0.0 if no data
+            Latest solar output value or 0.0 if no data.
         """
         result = self.get_latest_value("solar_output")
         return result["value"] if result else 0.0
 
     def get_grid_usage(self) -> float:
         """
-        Get the latest grid usage value
+        Get the latest grid usage value.
 
         Returns:
-            Latest grid usage value or 0.0 if no data
+            Latest grid usage value or 0.0 if no data.
         """
         result = self.get_latest_value("grid_usage")
         return result["value"] if result else 0.0
 
     def get_history(self, table: str, hours: int|None = None) -> List[Dict[str, Any]] | pd.DataFrame:
         """
-        Get history for a specific table
+        Get historical records for a specific table, optionally limited to the last N hours.
 
         Args:
-            table: Table name
-            hours: Number of hours to look back
+            table: Table name to query.
+            hours: Number of hours to look back (if None, returns all data as DataFrame).
 
         Returns:
-            List of records
+            List of records (dict) or DataFrame if hours is None.
         """
         try:
             if not os.path.exists(self.db_path):

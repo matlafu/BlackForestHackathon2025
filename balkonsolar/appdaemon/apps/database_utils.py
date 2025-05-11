@@ -8,20 +8,19 @@ load_dotenv(dotenv_path="balkonsolar/.env")
 
 class DatabaseManager:
     """
-    Standalone database manager for AppDaemon apps
-    Can be used without requiring the main balkonsolar package
+    Standalone database manager for AppDaemon apps.
+    Handles creation, connection, and operations for the energy data database.
+    Can be used without requiring the main balkonsolar package.
     """
-
     def __init__(self, db_path: str = None):
         """
-        Initialize the database manager
-
+        Initialize the database manager.
+        Tries multiple locations for the database file, creates tables if needed.
         Args:
-            db_path: Path to the database file
+            db_path: Path to the database file (optional).
         """
         if db_path is None:
             # Try multiple paths in order of preference
-
             # 1. First try repository root (local development setup)
             current_dir = os.path.dirname(os.path.abspath(__file__))
             # Go up two levels: from apps dir to appdaemon dir to balkonsolar dir
@@ -58,7 +57,10 @@ class DatabaseManager:
         self._ensure_db_exists()
 
     def _can_create_path(self, path: str) -> bool:
-        """Check if we can create the directory structure for this path"""
+        """
+        Check if we can create the directory structure for this path.
+        Returns True if successful, False otherwise.
+        """
         try:
             dir_path = os.path.dirname(path)
             if not os.path.exists(dir_path):
@@ -68,7 +70,10 @@ class DatabaseManager:
             return False
 
     def _ensure_db_exists(self):
-        """Make sure the database exists and has the required tables"""
+        """
+        Make sure the database exists and has the required tables.
+        Creates tables if they do not exist.
+        """
         db_dir = os.path.dirname(self.db_path)
         if db_dir and not os.path.exists(db_dir):
             try:
@@ -94,7 +99,6 @@ class DatabaseManager:
                 value REAL NOT NULL
             )
             """,
-
             # Table for solar output
             """
             CREATE TABLE IF NOT EXISTS solar_output (
@@ -103,7 +107,6 @@ class DatabaseManager:
                 value REAL NOT NULL
             )
             """,
-
             # Table for grid usage
             """
             CREATE TABLE IF NOT EXISTS grid_usage (
@@ -112,7 +115,6 @@ class DatabaseManager:
                 value REAL NOT NULL
             )
             """,
-
             # Table for irradiation data
             """
             CREATE TABLE IF NOT EXISTS irradiation_data (
@@ -121,7 +123,6 @@ class DatabaseManager:
                 value REAL NOT NULL
             )
             """,
-
             # Table to save the output algorithm
             """
             CREATE TABLE IF NOT EXISTS output_algorithm (
@@ -139,20 +140,21 @@ class DatabaseManager:
         conn.close()
 
     def _get_connection(self):
-        """Get a database connection with row factory enabled"""
+        """
+        Get a database connection with row factory enabled.
+        Returns a sqlite3.Connection object.
+        """
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
 
     def store_value(self, table: str, value: float, timestamp: Optional[str] = None) -> bool:
         """
-        Store a value in a specific table
-
+        Store a value in a specific table.
         Args:
             table: Table name
             value: Value to store
             timestamp: Optional timestamp (if None, current time is used)
-
         Returns:
             True if successful, False otherwise
         """
@@ -179,25 +181,29 @@ class DatabaseManager:
             return False
 
     def store_battery_status(self, value: float, timestamp: Optional[str] = None) -> bool:
-        """Store battery status value"""
+        """
+        Store battery status value in the battery_storage_status table.
+        """
         return self.store_value("battery_storage_status", value, timestamp)
 
     def store_solar_output(self, value: float, timestamp: Optional[str] = None) -> bool:
-        """Store solar output value"""
+        """
+        Store solar output value in the solar_output table.
+        """
         return self.store_value("solar_output", value, timestamp)
 
     def store_grid_usage(self, value: float, timestamp: Optional[str] = None) -> bool:
-        """Store grid usage value"""
+        """
+        Store grid usage value in the grid_usage table.
+        """
         return self.store_value("grid_usage", value, timestamp)
 
     def get_latest_values(self, table: str, limit: int = 1) -> List[Dict[str, Any]]:
         """
-        Get the latest values from a specific table
-
+        Get the latest values from a specific table.
         Args:
             table: Table name
             limit: Number of records to retrieve
-
         Returns:
             List of records as dictionaries
         """
@@ -225,27 +231,31 @@ class DatabaseManager:
             return []
 
     def get_battery_status(self, limit: int = 1) -> List[Dict[str, Any]]:
-        """Get the latest battery status entries"""
+        """
+        Get the latest battery status entries.
+        """
         return self.get_latest_values("battery_storage_status", limit)
 
     def get_solar_output(self, limit: int = 1) -> List[Dict[str, Any]]:
-        """Get the latest solar output entries"""
+        """
+        Get the latest solar output entries.
+        """
         return self.get_latest_values("solar_output", limit)
 
     def get_grid_usage(self, limit: int = 1) -> List[Dict[str, Any]]:
-        """Get the latest grid usage entries"""
+        """
+        Get the latest grid usage entries.
+        """
         return self.get_latest_values("grid_usage", limit)
 
     def get_values_by_timeframe(self, table: str, start_time: str, end_time: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
         """
-        Get values from a specific table within a timeframe
-
+        Get values from a specific table within a timeframe.
         Args:
             table: Table name
             start_time: Start time in ISO format
             end_time: Optional end time in ISO format
             limit: Maximum number of records to retrieve
-
         Returns:
             List of records as dictionaries
         """

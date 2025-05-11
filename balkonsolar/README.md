@@ -73,10 +73,10 @@ To run AppDaemon and connect it to your Home Assistant instance (running on a Ra
 Example `appdaemon.yaml`:
 ```yaml
 appdaemon:
-  latitude: !env_var APPDAEMON_LATITUDE
-  longitude: !env_var APPDAEMON_LONGITUDE
-  elevation: !env_var APPDAEMON_ELEVATION
-  time_zone: !env_var APPDAEMON_TIMEZONE
+  latitude: !env_var LATITUDE
+  longitude: !env_var LONGITUDE
+  elevation: !env_var ELEVATION
+  time_zone: !env_var TIMEZONE
 hass:
   url: !env_var NABU_CASA_URL
   token: !env_var HOME_ASSISTANT_TOKEN

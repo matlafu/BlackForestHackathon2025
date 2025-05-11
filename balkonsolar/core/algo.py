@@ -1,3 +1,9 @@
+"""
+Algorithm for Balkonsolar energy management.
+
+This script forecasts energy usage, PV production, and grid demand for the next 24 hours, then suggests optimal battery charging and energy usage strategies.
+It integrates data from the database and utility functions, simulates battery behavior, and stores the resulting schedule in the database.
+"""
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
