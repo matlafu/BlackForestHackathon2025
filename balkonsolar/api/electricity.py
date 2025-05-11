@@ -2,6 +2,8 @@
 Electricity price API client for ENTSOE.
 """
 import os
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="balkonsolar/.env")
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Union
 
@@ -29,7 +31,7 @@ class ENTSOEClient(BaseAPIClient):
         """
         super().__init__(
             base_url="https://transparency.entsoe.eu/api",
-            api_key=api_key,
+            api_key=api_key or os.getenv("ENTSOE_API_KEY"),
             timeout=timeout,
             cache_ttl=cache_ttl,
         )

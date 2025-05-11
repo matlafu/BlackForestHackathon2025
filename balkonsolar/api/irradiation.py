@@ -11,6 +11,9 @@ import os
 from datetime import datetime, timedelta
 from diskcache import Cache
 from ..core.database_interface import DatabaseInterface
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="balkonsolar/.env")
 
 logger = logging.getLogger(__name__)
 
@@ -47,14 +50,14 @@ class ForecastSolarClient():
         self.declination = declination
         self.azimuth = azimuth
         self.kwp = kwp
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("FORECAST_SOLAR_API_KEY")
         self.cache_ttl = cache_ttl
-        
+
         cache_dir = os.path.join(Path(__file__).parent, cache_dirname)
 
         # Ensure cache directory exists
         os.makedirs(cache_dir, exist_ok=True)
-        
+
         # Initialize disk cache
         self.cache = Cache(cache_dir)
 
@@ -68,7 +71,7 @@ class ForecastSolarClient():
         Returns: The response from the Forecast.Solar API as a dictionary
         '''
         cache_key = self._get_cache_key()
-        
+
         # Try to get from cache first
         cached_data = self.cache.get(cache_key)
         if cached_data is not None:
@@ -77,7 +80,7 @@ class ForecastSolarClient():
             if time.time() - timestamp <= self.cache_ttl:
                 logger.info("Using cached forecast data")
                 return data
-        
+
         headers = {}
         if self.api_key:
             headers['X-FORECAST-API-KEY'] = self.api_key
@@ -87,10 +90,10 @@ class ForecastSolarClient():
             response = requests.get(self.base_url + params_url_suffix, headers=headers)
             response.raise_for_status()
             result = response.json().get('result', {})
-            
+
             # Store in cache with current timestamp
             self.cache[cache_key] = (time.time(), result)
-            
+
             return result
         except requests.exceptions.RequestException as e:
             logger.error(f"Error getting forecast data: {e}")
@@ -121,19 +124,19 @@ class ForecastSolarClient():
         except Exception as e:
             logger.error(f"Error getting current power: {e}")
             return 0.0
-            
+
     def clear_cache(self):
         """Clear all cache entries."""
         self.cache.clear()
-        
+
     def set_cache_ttl(self, ttl_seconds: int):
         """Update the TTL for cache entries.
-        
+
         Args:
             ttl_seconds: New TTL value in seconds
         """
         self.cache_ttl = ttl_seconds
-    
+
     def save_irradiation_data_to_database(self, value: float, timestamp: Optional[str] = None):
         '''
         Save the irradiation data to the database.

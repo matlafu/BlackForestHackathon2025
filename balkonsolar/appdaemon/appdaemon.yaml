@@ -1,7 +1,8 @@
 appdaemon:
-  latitude: !env_var LATITUDE:48.016723243302046
-  longitude: !env_var LONGITUDE:7.82866886720531
-  time_zone: !env_var TIMEZONE:Europe/Berlin
+  latitude: !env_var LATITUDE
+  longitude: !env_var LONGITUDE
+  elevation: !env_var ELEVATION
+  time_zone: !env_var TIMEZONE
 
   # Plugins section to connect to Home Assistant (HASS)
   plugins:
