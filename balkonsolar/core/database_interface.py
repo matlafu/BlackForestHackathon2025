@@ -181,10 +181,7 @@ class DatabaseInterface:
                 conn.close()
                 return results
             else:
-                cursor.execute(
-                    f"SELECT * FROM {table};"
-                )
-                df = pd.DataFrame(cursor.fetchall(), columns=[i[0] for i in cursor.description])
+                df = pd.read_sql_query(f"SELECT * FROM {table};", conn)
                 conn.close()
                 return df
             

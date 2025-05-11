@@ -1,21 +1,34 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from balkonsolar.core.database_interface import DatabaseInterface
-from balkonsolar.utils.read_average_energy_consumption import main as read_average_energy_consumption
+import os
+import sys
+
+# Fix imports: use relative import for database_interface
+from database_interface import DatabaseInterface
+
+# Add the project root to the Python path - keep this as a backup
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+# Use relative import for read_average_energy_consumption
+from utils.read_average_energy_consumption import main as read_average_energy_consumption
 
 # Initialize database interface
 db = DatabaseInterface()
 
 # Get irradiation forecast
 irradiation_forecast = db.get_irradiation_forecast()
+irradiation_forecast["timestamp"] = pd.to_datetime(irradiation_forecast["timestamp"])
+irradiation_forecast = irradiation_forecast[irradiation_forecast["timestamp"].apply(lambda x: x.minute == 0 and x.second == 0)]
 
 # Get grid usage forecast
 grid_usage_forecast = db.get_grid_usage_forecast()
+grid_usage_forecast["timestamp"] = grid_usage_forecast["timestamp"].apply(lambda x: datetime.strptime(x.replace("+02:00", ""), "%Y-%m-%d %H:%M:%S"))
 
 # Get average grid usage for the next 24 hours
-average_grid_usage = read_average_energy_consumption()
-
+average_grid_usage = read_average_energy_consumption(datetime.now())
 
 # Create a mock DataFrame for the next 24 hours
 hours = pd.date_range(start=datetime.now().replace(minute=0, second=0, microsecond=0), periods=24, freq='H')
