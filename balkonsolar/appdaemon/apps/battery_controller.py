@@ -1,14 +1,19 @@
 import appdaemon.plugins.hass.hassapi as hass
 from virtual_battery import VirtualBattery
+from database_utils import DatabaseManager
 
 class BatteryController(hass.Hass):
     def initialize(self):
         self.log("BatteryController initialized! App name: battery_controller")
         self.pv_app = self.get_app("pv_production_reader")
         self.consumption_app = self.get_app("household_consumption_reader")
-        # Make sure battery is initialized
-        if not hasattr(self, 'battery'):
-            self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
+        self.battery = VirtualBattery(capacity_kwh=2.560, initial_charge_kwh=0.0)
+        
+        # Initialize database with path from config
+        db_path = self.args.get("db_path", None)  # None will use the default path
+        self.db_manager = DatabaseManager(db_path)
+        self.log(f"Database initialized at {self.db_manager.db_path}")
+        
         self.active = False
         self.current_action = "off"
         self.current_power = 0.0
@@ -28,17 +33,17 @@ class BatteryController(hass.Hass):
             )
             return
         if grid_power < 0:
-            # Charging
             surplus_energy = abs(grid_power) * interval_hours / 1000  # in kWh
             self.battery.charge(surplus_energy)
             self.current_action = "charging"
             self.current_power = abs(grid_power)
+            self.log(f"Battery charged with {surplus_energy:.4f} kWh surplus.")
         elif grid_power > 0:
-            # Discharging
             deficit_energy = grid_power * interval_hours / 1000  # in kWh
             discharged = self.battery.discharge(deficit_energy)
             self.current_action = "discharging" if discharged > 0 else "idle"
             self.current_power = grid_power if discharged > 0 else 0.0
+            self.log(f"Battery discharged by {discharged:.4f} kWh to cover deficit.")
         else:
             self.current_action = "idle"
             self.current_power = 0.0
@@ -50,7 +55,16 @@ class BatteryController(hass.Hass):
         elif state['current_charge_kwh'] <= 0:
             self.active = False
             self.log("Battery fully discharged, turning off.")
+        # Log the current charge to the database
+        self.set_battery_charge(int(state['current_charge_kwh']))
         self.log(self._status_log(state))
+        
+        # Log solar, battery, and grid data to the database
+        timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
+        self.db_manager.store_battery_status(self.battery.current_charge, timestamp)
+        self.db_manager.store_solar_output(pv_power, timestamp)
+        self.db_manager.store_grid_usage(grid_power, timestamp)
+        self.log(f"Logged energy data to database at {timestamp}")
 
     def activate_battery(self):
         self.active = True
@@ -101,3 +115,8 @@ class BatteryController(hass.Hass):
         # Access the VirtualBattery internal attribute
         self.battery.current_charge = new_charge
         self.log(f"Battery charge manually set to {new_charge:.2f} kWh")
+        
+        # Log the manual change to the database
+        timestamp = self.datetime().strftime("%Y-%m-%d %H:%M:%S")
+        self.log(f"Logging battery charge {new_charge} kWh to database at {timestamp}")
+        self.db_manager.store_battery_status(new_charge, timestamp)

@@ -1,6 +1,7 @@
 household_consumption_reader:
   module: household_consumption_reader
   class: HouseholdConsumptionReader
+  db_path: ../../data/energy_data.db
 
 rgb_bulb:
   module: rgb_bulb
@@ -14,6 +15,7 @@ pv_production_reader:
   module: pv_production_reader
   class: PVProductionReader
   dashboard_url: "http://dummy-dashboard.local/api/update"
+  db_path: ../../data/energy_data.db
 
 fake_battery_actions:
   module: fake_controllers
@@ -22,3 +24,13 @@ fake_battery_actions:
 fake_rgb_bulb_actions:
   module: fake_controllers
   class: FakeRGBBulbActions
+
+battery_controller:
+  module: battery_controller
+  class: BatteryController
+  db_path: ../../data/energy_data.db
+
+# Global settings that apply to all apps
+global:
+  # Default database path for all apps (relative to the apps directory)
+  db_path: ../../data/energy_data.db

@@ -1,15 +1,14 @@
 appdaemon:
-  latitude: 47.9990
-  longitude: 7.8421
-  elevation: 278
-  time_zone: Europe/Berlin
+  latitude: !env_var LATITUDE:48.016723243302046
+  longitude: !env_var LONGITUDE:7.82866886720531
+  time_zone: !env_var TIMEZONE:Europe/Berlin
 
   # Plugins section to connect to Home Assistant (HASS)
   plugins:
     HASS:
       type: hass
-      ha_url: "https://sgyiv0nrwtxojazwfihtt39gmvmhlndm.ui.nabu.casa"  # Replace with your Home Assistant URL
-      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkYTY0NWFjYjBkZDE0NzExYmUyMDRkNGFmMmU0ZWIwOSIsImlhdCI6MTc0NjgxNjcyMiwiZXhwIjoyMDYyMTc2NzIyfQ.71xLTtzY8Zsrl5sqCx4hxwj-nWU4k8_F_yG37eNDUMg"    # Replace with your Home Assistant long-lived access token
+      ha_url: !env_var NABU_CASA_URL  # Use environment variable
+      token: !env_var HOME_ASSISTANT_TOKEN  # Use environment variable
 
   # Log settings
   logs:

@@ -5,7 +5,7 @@ import rootutils
 root = rootutils.setup_root(__file__, pythonpath=True)
 
 from balkonsolar.core.rules import determine_balkonsolar_state
-from balkonsolar.appdaemon.apps.battery_controller import BatteryController
+from balkonsolar.core.database_interface import DatabaseInterface
 from balkonsolar.api.grid import StromGedachtClient
 
 def run_balkonsolar_advisor():
@@ -25,13 +25,18 @@ def run_balkonsolar_advisor():
     # Get grid demand from API based on zip code
     stromGedachtClient = StromGedachtClient(zip_code=zip_code)
     
-    battery = BatteryController()
+    # Use DatabaseInterface to access energy data
+    db = DatabaseInterface()
     
     try:
-        # For demonstration purposes, simulate current values
-        # In a real implementation, you would fetch these from sensors or APIs
-        current_solar_production = 250
-        current_battery_percent = battery.get_battery_status()["percent_full"]
+        # Get data from the database
+        battery_status = db.get_battery_status()
+        current_solar_production = db.get_solar_output()
+        if current_solar_production == 0:
+            # Use a default value for demo if no data in database
+            current_solar_production = 250
+            
+        current_battery_percent = battery_status.get("percent_full", 0)
         
         # Get grid demand from API based on zip code
         print(f"\nFetching grid demand data for ZIP code {zip_code}...")
@@ -49,8 +54,8 @@ def run_balkonsolar_advisor():
         # Display system status and recommendation
         print("\n===== System Status =====")
         print(f"Solar Production: {current_solar_production}W / {max_solar_capacity}W")
-        print(f"Battery Charge: {current_battery_percent} / {max_battery_capacity}Wh " + 
-              f"({int(current_battery_percent/max_battery_capacity*100)}%)")
+        print(f"Battery Charge: {battery_status.get('current_charge_kwh', 0):.2f} / {max_battery_capacity}kWh " + 
+              f"({current_battery_percent:.1f}%)")
         
         print("\n===== Recommendation =====")
         print(f"Optimal state: {state}")
