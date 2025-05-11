@@ -19,6 +19,7 @@ def store_solar_production_predictions():
         azimuth=0,
         kwp=0.8,
     )
+    print(asyncio.run(client.get_forecast()).keys())
     watt_hours_dict = asyncio.run(client.get_watt_hours())
     watt_hours_df = pd.DataFrame(list(watt_hours_dict.items())).rename(columns={0: "timestamp", 1: "watt_hours"})
     watt_hours_df = watt_hours_df.sort_values(by="timestamp")
