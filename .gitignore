@@ -12,3 +12,4 @@ venv/*
 memory-bank/
 .envrc
 test*
+.idea/

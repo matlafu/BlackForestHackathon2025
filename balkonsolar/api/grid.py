@@ -119,8 +119,4 @@ class StromGedachtClient():
         elif 'states' in data:
             return data['states'] 
         return data  # Return the full response if we can't determine the format
-        
-    async def close(self):
-        """Close the client (async version)"""
-        # Nothing to clean up in this simple client
-        pass
+

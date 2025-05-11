@@ -3,6 +3,7 @@ Solar forecast API client for forecast.solar
 """
 
 import time
+from pathlib import Path
 from typing import Optional
 import requests
 import logging
@@ -24,7 +25,7 @@ class ForecastSolarClient():
             azimuth: float = 180,
             kwp: float = 1.0,
             api_key: Optional[str] = None,
-            cache_dir: str = ".forecast_solar_cache",
+            cache_dirname: str = ".forecast_solar_cache",
             cache_ttl: int = 3600  # 1 hour default TTL in seconds
     ):
         """
@@ -37,7 +38,7 @@ class ForecastSolarClient():
             azimuth: The azimuth angle of the panels (180=south)
             kwp: The peak power of the installation in kWp
             api_key: Optional API key for premium features
-            cache_dir: Directory for cache storage
+            cache_dirname: Directory for cache storage
             cache_ttl: Time-to-live for cache entries in seconds
         """
         self.base_url = "https://api.forecast.solar/"
@@ -49,6 +50,8 @@ class ForecastSolarClient():
         self.api_key = api_key
         self.cache_ttl = cache_ttl
         
+        cache_dir = os.path.join(Path(__file__).parent, cache_dirname)
+
         # Ensure cache directory exists
         os.makedirs(cache_dir, exist_ok=True)
         
