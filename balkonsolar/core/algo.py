@@ -22,10 +22,17 @@ db = DatabaseInterface()
 irradiation_forecast = db.get_irradiation_forecast()
 irradiation_forecast["timestamp"] = pd.to_datetime(irradiation_forecast["timestamp"])
 irradiation_forecast = irradiation_forecast[irradiation_forecast["timestamp"].apply(lambda x: x.minute == 0 and x.second == 0)]
+# Set the timestamp as index
+irradiation_forecast = irradiation_forecast.set_index("timestamp")
+irradiation_forecast = irradiation_forecast.rename(columns={"watt_hours": "pv_prod"})
+
 
 # Get grid usage forecast
 grid_usage_forecast = db.get_grid_usage_forecast()
 grid_usage_forecast["timestamp"] = grid_usage_forecast["timestamp"].apply(lambda x: datetime.strptime(x.replace("+02:00", ""), "%Y-%m-%d %H:%M:%S"))
+grid_usage_forecast = grid_usage_forecast.rename(columns={"grid_state": "grid_demand"})
+# Set the timestamp as index
+grid_usage_forecast = grid_usage_forecast.set_index("timestamp")
 
 # Get average grid usage for the next 24 hours
 average_grid_usage = read_average_energy_consumption(datetime.now())
@@ -34,19 +41,24 @@ average_grid_usage = read_average_energy_consumption(datetime.now())
 hours = pd.date_range(start=datetime.now().replace(minute=0, second=0, microsecond=0), periods=24, freq='H')
 np.random.seed(42)
 
-# Simulated data
-pv_prod = np.random.randint(100, 400, size=24)  # in Wh
-grid_demand = np.random.choice([-1, 1, 2, 3], size=24, p=[0.2, 0.4, 0.3, 0.1])
-usage = np.random.randint(50, 250, size=24)  # in Wh
+# Simulated data bc out battery is not working and our pv is also not genearting any power so our virtual battery is empty lol
 battery_input = np.zeros(24)  # initialized to 0
 
 # Create the DataFrame
 df = pd.DataFrame({
-    "pv_prod": pv_prod,
-    "grid_demand": grid_demand,
-    "usage": usage,
-    "battery_input": battery_input
+    "usage": average_grid_usage,
+    "battery_input": battery_input,
 }, index=hours)
+
+# Merge irradiation forecast with df
+df = pd.merge(df, irradiation_forecast, left_index=True, right_index=True, how="left")
+
+
+# Merge grid usage forecast with df
+df = pd.merge(df, grid_usage_forecast, left_index=True, right_index=True, how="left")
+# Fill the missing values with 0
+df["grid_demand"] = df["grid_demand"].fillna(0)
+df["pv_prod"] = df["pv_prod"].fillna(0)
 
 # Set battery capacity values
 battery_max = 2000  # Wh
