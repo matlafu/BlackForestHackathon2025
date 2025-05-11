@@ -1,5 +1,7 @@
 """
-Balkonsolar System Optimization Algorithm
+Balkonsolar System Optimization Rules
+
+Provides the core logic to determine the optimal operating state for a Balkonsolar system based on grid demand, solar production, and battery status.
 
 This algorithm determines the optimal operating state for a Balkonsolar system
 based on current grid demand, solar production, and battery capacity.
@@ -17,7 +19,7 @@ Args:
     max_solar_capacity (float): Maximum solar production capacity (Watts)
     max_battery_percent (float): Maximum battery capacity (percentage)
     min_battery_percent (float): Minimum desired battery charge level (percentage)
-    
+
 Returns:
     int: The recommended state (0-3)
 """
@@ -30,11 +32,26 @@ def determine_balkonsolar_state(
     grid_demand,
     solar_production,
     max_battery_capacity, # get from user
-    current_battery_capacity, # we get this from moritz, 
+    current_battery_capacity, # we get this from moritz,
     max_solar_capacity, #user
     battery_high_threshold = 0.8, # we get this from user
     min_battery_percent = 0.25 # we get this from user
 ):
+    """
+    Determine the optimal state for the Balkonsolar system.
+
+    Args:
+        grid_demand (int): Current grid demand level from Stromgedacht API (0, 1, or 2)
+        solar_production (float): Current solar production (Watts)
+        max_battery_capacity (float): Maximum battery capacity (Wh)
+        current_battery_capacity (float): Current battery charge (Wh)
+        max_solar_capacity (float): Maximum solar production capacity (Watts)
+        battery_high_threshold (float): Threshold for considering battery 'full' (default 0.8)
+        min_battery_percent (float): Minimum desired battery charge level (default 0.25)
+
+    Returns:
+        int: The recommended state (0=use solar, 1=charge battery, 2=use battery, 3=use grid)
+    """
     # Define thresholds for solar production (high if > 50% of maximum capacity)
     solar_high_threshold = USER_SOLAR_HIGH_THRESHOLD * max_solar_capacity
     current_battery_percent = current_battery_capacity/max_battery_capacity
@@ -59,15 +76,15 @@ def determine_balkonsolar_state(
     # Logic implementation based on the truth table and requirements
     if is_solar_production_high:
         if is_battery_filled:
-            return 0
+            return 0  # Use solar to power household
         else:
-            return 1
+            return 1  # Charge battery from solar
     else:
         # Solar production is low
         if is_battery_low or not is_grid_demand_high:
-            return 3
+            return 3  # Use grid to power household
         else:
-            return 2
+            return 2  # Use battery to power household
 
 
 # USAGE
@@ -76,7 +93,7 @@ def determine_balkonsolar_state(
 
 # Args:
 #     zip_code (str): The postal code to check grid demand for
-    
+
 # Returns:
 #     int: Grid demand value (0=low, 1=medium, 2=high)
 # """
@@ -85,12 +102,12 @@ def determine_balkonsolar_state(
 #     # In a real implementation, you would make an HTTP request like:
 #     # response = requests.get(f"https://api.stromgedacht.de/v1/now?zip={zip_code}")
 #     # return response.json()["state"]
-    
+
 #     # For testing purposes, return a random value between 0-2
 #     import random
 #     return random.randint(0, 2)
-# 
-# 
+#
+#
 # """
 # Get user input for system configuration and run the algorithm
 
