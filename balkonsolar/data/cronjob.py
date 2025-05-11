@@ -8,7 +8,7 @@ from datetime import datetime
 def main():
         #script_cop
     scheduler = BackgroundScheduler()
-    scheduler.add_job(call_timeout, 'interval', minutes=30, misfire_grace_time=60, next_run_time=datetime.now(), args=(20, store_data_for_scheduling))
+    scheduler.add_job(call_timeout, 'interval', minutes=10, misfire_grace_time=60, next_run_time=datetime.now(), args=(20, store_data_for_scheduling))
 
 
 def call_timeout(timeout, func):
