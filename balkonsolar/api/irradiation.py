@@ -98,7 +98,7 @@ class ForecastSolarClient():
 
     async def get_watt_hours(self) -> dict:
         forecast = await self.get_forecast()
-        watt_hour_forecast = forecast["watt_hours"]
+        watt_hour_forecast = forecast["watt_hours_period"]
         format = "%Y-%m-%d %H:%M:%S"
         return { datetime.strptime(timestamp, format): watts for (timestamp, watts) in
                       watt_hour_forecast.items() }
