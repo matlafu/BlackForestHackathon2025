@@ -105,5 +105,9 @@ for idx, row in df.iterrows():
 # Drop helper column before presenting
 df.drop(columns=["surplus"], inplace=True)
 
+# Transform the index to a column 
+df.reset_index(inplace=True)
+df.rename(columns={"index": "timestamp"}, inplace=True)
 
+# Store the output
 db.store_output_algorithm(df)

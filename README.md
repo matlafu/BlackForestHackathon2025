@@ -13,9 +13,9 @@ The system uses real-time data integration from weather forecasts, electricity p
 ```
 ┌─────────────────────────┐     ┌─────────────────────────┐
 │ External Data Sources   │     │ Home Assistant          │
-│ - Weather Forecasts     │     │ - Sensor Integration    │
-│ - Electricity Prices    │◄───►│ - Device Control        │
+│ - Weather Forecasts     │◄───►│ - Sensor Integration    │   
 │ - Grid Demand           │     │ - User Interface        │
+|                         |     | - Device Control        │
 └─────────────────────────┘     └─────────────────────────┘
             ▲                               ▲
             │                               │
@@ -27,6 +27,10 @@ The system uses real-time data integration from weather forecasts, electricity p
 │ - Database              │     │ - Virtual Devices       │
 └─────────────────────────┘     └─────────────────────────┘
 ```
+
+## How it works:
+
+1.- We Collect 
 
 ### Main Components:
 
