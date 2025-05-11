@@ -1,8 +1,3 @@
-/*
-  data-service.ts for the Balkonsolar Dashboard
-  - Provides types, mock data, and utility functions for fetching and generating energy data
-  - Used by the dashboard UI for both mockup and live/historic data
-*/
 // This is a mock data service that would normally fetch data from a database
 // In a real application, you would replace this with actual API calls
 
@@ -39,8 +34,9 @@ export interface EnergyData {
     value: number;
   }>;
   output_algorithm: Array<{
-    id: number;
+    id?: number;
     timestamp: string;
+    suggested_state: string;
     value: number;
   }>;
 }
@@ -284,18 +280,20 @@ const powerFlowPatterns: Record<string, PowerFlow> = {
 }
 
 // Helper function to generate historical data points
-function generateHistoricalDataPoints(baseValue: number, hours: number = 24): Array<{ id: number; timestamp: string; value: number }> {
+function generateHistoricalDataPoints(baseValue: number, hours: number = 24, isAlgorithm: boolean = false): Array<any> {
   const data = [];
   const now = new Date();
   now.setMinutes(0, 0, 0); // Runde auf volle Stunden
-
+  
+  const states = ["Charge Battery", "Use Grid", "power the household from solar", "Mixed"];
+  
   for (let i = 0; i < hours; i++) {
     // Berechne den Zeitstempel für jede Stunde, beginnend von 24 Stunden vor jetzt
     const time = new Date(now.getTime());
     time.setHours(time.getHours() - (hours - 1 - i));
-
+    
     const hourOfDay = time.getHours();
-
+    
     // Add daily pattern variation
     let multiplier = 1;
     if (hourOfDay >= 6 && hourOfDay <= 18) { // Daytime hours
@@ -304,17 +302,38 @@ function generateHistoricalDataPoints(baseValue: number, hours: number = 24): Ar
     } else { // Nighttime hours
       multiplier = 0.5;
     }
-
+    
     // Add some random variation
     const randomFactor = 0.8 + Math.random() * 0.4;
-
-    data.push({
-      id: i + 1,
-      timestamp: time.toISOString(),
-      value: baseValue * multiplier * randomFactor
-    });
+    
+    if (isAlgorithm) {
+      // Für output_algorithm, wähle einen Zustand basierend auf der Tageszeit
+      let suggested_state;
+      if (hourOfDay >= 6 && hourOfDay <= 10) {
+        suggested_state = "Charge Battery";
+      } else if (hourOfDay >= 11 && hourOfDay <= 14) {
+        suggested_state = "power the household from solar";
+      } else if (hourOfDay >= 15 && hourOfDay <= 19) {
+        suggested_state = "Mixed";
+      } else {
+        suggested_state = "Use Grid";
+      }
+      
+      data.push({
+        id: i + 1,
+        timestamp: time.toISOString(),
+        suggested_state,
+        value: baseValue * multiplier * randomFactor
+      });
+    } else {
+      data.push({
+        id: i + 1,
+        timestamp: time.toISOString(),
+        value: baseValue * multiplier * randomFactor
+      });
+    }
   }
-
+  
   return data;
 }
 
@@ -339,7 +358,7 @@ export function getInitialMockupData(): EnergyData {
     solar_output: generateHistoricalDataPoints(2.4),
     battery_storage_status: generateHistoricalDataPoints(1.7),
     grid_usage: generateHistoricalDataPoints(0.8),
-    output_algorithm: generateHistoricalDataPoints(1.0),
+    output_algorithm: generateHistoricalDataPoints(1.0, 24, true),
     hourlyRecommendations: originalHourlyRecommendations,
     powerFlow: originalPowerFlow,
   }
@@ -406,8 +425,8 @@ export function getHistoricMockupData(time: Date): EnergyData {
     solar_output: generateHistoricalDataPoints(solarProduction),
     battery_storage_status: generateHistoricalDataPoints(batteryStorage),
     grid_usage: generateHistoricalDataPoints(gridUsage),
-    output_algorithm: generateHistoricalDataPoints(totalConsumption),
-    hourlyRecommendations: originalHourlyRecommendations,
+    output_algorithm: generateHistoricalDataPoints(totalConsumption, 24, true),
+    hourlyRecommendations: mapAlgorithmOutputToRecommendations(generateHistoricalDataPoints(totalConsumption, 24, true)),
     powerFlow,
   }
 }
@@ -415,28 +434,51 @@ export function getHistoricMockupData(time: Date): EnergyData {
 // Fetch current data (realtime mode)
 export async function fetchCurrentData(): Promise<EnergyData> {
   try {
-    // Fetch latest data for each table
-    const [solarOutput, batteryStatus, gridUsage, outputAlgorithm] = await Promise.all([
-      fetch('/api/energy?table=solar_output&limit=1&order=desc').then(res => res.json()),
-      fetch('/api/energy?table=battery_storage_status&limit=1&order=desc').then(res => res.json()),
-      fetch('/api/energy?table=grid_usage&limit=1&order=desc').then(res => res.json()),
-      fetch('/api/energy?table=output_algorithm&limit=1&order=desc').then(res => res.json())
-    ]);
-
-    // Fetch historical data for charts (last 24 hours)
-    const [historicalSolar, historicalBattery, historicalGrid, historicalOutput] = await Promise.all([
-      fetch('/api/energy?table=solar_output&limit=24').then(res => res.json()),
-      fetch('/api/energy?table=battery_storage_status&limit=24').then(res => res.json()),
-      fetch('/api/energy?table=grid_usage&limit=24').then(res => res.json()),
-      fetch('/api/energy?table=output_algorithm&limit=24').then(res => res.json())
-    ]);
-
     const now = new Date();
+    now.setMinutes(0, 0, 0); // Round to current hour
 
-    // Get the latest values from the single record queries
-    const currentSolarProduction = solarOutput[0]?.value || 0;
-    const currentBatteryStorage = batteryStatus[0]?.value || 0;
-    const currentGridUsage = gridUsage[0]?.value || 0;
+    // Fetch data for each table
+    const [solarOutput, batteryStatus, gridUsage, outputAlgorithm] = await Promise.all([
+      fetch(`/api/energy?table=solar_output&limit=24`).then(res => res.json()),
+      fetch(`/api/energy?table=battery_storage_status&limit=24`).then(res => res.json()),
+      fetch(`/api/energy?table=grid_usage&limit=24`).then(res => res.json()),
+      fetch(`/api/energy?table=output_algorithm&limit=24`).then(res => res.json())
+    ]);
+
+    console.log('API Antwort für output_algorithm:', outputAlgorithm);
+
+    // Stelle sicher, dass die Algorithmus-Ausgabe das richtige Format hat
+    const formattedOutputAlgorithm = outputAlgorithm.map((entry: any) => ({
+      id: entry.id || undefined,
+      timestamp: entry.timestamp,
+      suggested_state: entry.suggested_state || entry.grid_state || 'Use Grid', // Fallback auf grid_state oder 'Use Grid'
+      value: entry.value || 0
+    }));
+
+    console.log('Formatierte Algorithmus-Ausgabe:', formattedOutputAlgorithm);
+
+    // Find the current values
+    const findCurrentValue = (data: any[]) => {
+      const currentHourData = data.find(entry => {
+        const entryTime = new Date(entry.timestamp);
+        return entryTime.getHours() === now.getHours();
+      });
+      return currentHourData?.value || 0;
+    };
+
+    // Für Battery Storage den neuesten Wert verwenden
+    const findLatestBatteryValue = (data: any[]) => {
+      if (!data || data.length === 0) return 0;
+      const maxTimestamp = Math.max(...data.map(entry => new Date(entry.timestamp).getTime()));
+      const latestEntry = data.find(entry => new Date(entry.timestamp).getTime() === maxTimestamp);
+      // Konvertiere den Wert in kWh (der Wert kommt als Prozent)
+      const batteryCapacityKWh = 1.5; // Maximale Kapazität in kWh
+      return (latestEntry?.value || 0) * batteryCapacityKWh / 100;
+    };
+
+    const currentSolarProduction = findCurrentValue(solarOutput);
+    const currentBatteryStorage = findLatestBatteryValue(batteryStatus);
+    const currentGridUsage = findCurrentValue(gridUsage);
     const currentTotalConsumption = currentSolarProduction + currentGridUsage;
 
     // Calculate power flow based on current values
@@ -448,18 +490,21 @@ export async function fetchCurrentData(): Promise<EnergyData> {
       batteryToGrid: Math.max(0, currentBatteryStorage * 0.1)
     };
 
-    // Return the combined data with latest values and historical data
+    // Map algorithm output to hourly recommendations
+    const hourlyRecommendations = mapAlgorithmOutputToRecommendations(formattedOutputAlgorithm);
+
+    // Return the combined data
     return {
       timestamp: now,
       solarProduction: currentSolarProduction,
       batteryStorage: currentBatteryStorage,
       gridUsage: currentGridUsage,
       totalConsumption: currentTotalConsumption,
-      solar_output: historicalSolar,
-      battery_storage_status: historicalBattery,
-      grid_usage: historicalGrid,
-      output_algorithm: historicalOutput,
-      hourlyRecommendations: originalHourlyRecommendations,
+      solar_output: solarOutput,
+      battery_storage_status: batteryStatus,
+      grid_usage: gridUsage,
+      output_algorithm: formattedOutputAlgorithm,
+      hourlyRecommendations,
       powerFlow
     };
   } catch (error) {
@@ -473,7 +518,7 @@ export async function fetchHistoricData(time: Date): Promise<EnergyData> {
   try {
     // Convert the time to ISO string for the API
     const timestamp = time.toISOString();
-
+    
     // Fetch data for each table around the specified time
     const [solarOutput, batteryStatus, gridUsage, outputAlgorithm] = await Promise.all([
       fetch(`/api/energy?table=solar_output&timestamp=${timestamp}&limit=24`).then(res => res.json()),
@@ -481,6 +526,18 @@ export async function fetchHistoricData(time: Date): Promise<EnergyData> {
       fetch(`/api/energy?table=grid_usage&timestamp=${timestamp}&limit=24`).then(res => res.json()),
       fetch(`/api/energy?table=output_algorithm&timestamp=${timestamp}&limit=24`).then(res => res.json())
     ]);
+
+    console.log('Historische API Antwort für output_algorithm:', outputAlgorithm);
+
+    // Stelle sicher, dass die Algorithmus-Ausgabe das richtige Format hat
+    const formattedOutputAlgorithm = outputAlgorithm.map((entry: any) => ({
+      id: entry.id || undefined,
+      timestamp: entry.timestamp,
+      suggested_state: entry.suggested_state || entry.grid_state || 'Use Grid', // Fallback auf grid_state oder 'Use Grid'
+      value: entry.value || 0
+    }));
+
+    console.log('Formatierte historische Algorithmus-Ausgabe:', formattedOutputAlgorithm);
 
     // Find the closest data points to the requested time
     const findClosestValue = (data: any[]) => {
@@ -491,8 +548,20 @@ export async function fetchHistoricData(time: Date): Promise<EnergyData> {
       });
     };
 
+    // Für Battery Storage den neuesten Wert bis zum gewählten Zeitpunkt verwenden
+    const findLatestBatteryValue = (data: any[]) => {
+      if (!data || data.length === 0) return { value: 0 };
+      const validData = data.filter(entry => new Date(entry.timestamp) <= time);
+      if (validData.length === 0) return { value: 0 };
+      const maxTimestamp = Math.max(...validData.map(entry => new Date(entry.timestamp).getTime()));
+      const latestEntry = validData.find(entry => new Date(entry.timestamp).getTime() === maxTimestamp);
+      // Konvertiere den Wert in kWh (der Wert kommt als Prozent)
+      const batteryCapacityKWh = 1.5; // Maximale Kapazität in kWh
+      return { value: ((latestEntry?.value || 0) * batteryCapacityKWh / 100) };
+    };
+
     const currentSolarProduction = findClosestValue(solarOutput).value;
-    const currentBatteryStorage = findClosestValue(batteryStatus).value;
+    const currentBatteryStorage = findLatestBatteryValue(batteryStatus).value;
     const currentGridUsage = findClosestValue(gridUsage).value;
     const currentTotalConsumption = currentSolarProduction + currentGridUsage;
 
@@ -505,6 +574,9 @@ export async function fetchHistoricData(time: Date): Promise<EnergyData> {
       batteryToGrid: Math.max(0, currentBatteryStorage * 0.1)
     };
 
+    // Map algorithm output to hourly recommendations
+    const hourlyRecommendations = mapAlgorithmOutputToRecommendations(formattedOutputAlgorithm);
+
     return {
       timestamp: time,
       solarProduction: currentSolarProduction,
@@ -514,8 +586,8 @@ export async function fetchHistoricData(time: Date): Promise<EnergyData> {
       solar_output: solarOutput,
       battery_storage_status: batteryStatus,
       grid_usage: gridUsage,
-      output_algorithm: outputAlgorithm,
-      hourlyRecommendations: originalHourlyRecommendations,
+      output_algorithm: formattedOutputAlgorithm,
+      hourlyRecommendations,
       powerFlow
     };
   } catch (error) {
@@ -576,7 +648,7 @@ export function generateHistoricBatteryData(): Array<{ time: Date; level: number
   for (let i = 0; i < 24; i++) {
     const time = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000);
     const hour = time.getHours();
-
+    
     // Simuliere einen typischen Tagesverlauf des Batteriestands
     let level = 0.5; // Grundniveau
 
@@ -609,4 +681,75 @@ export function generateHistoricBatteryData(): Array<{ time: Date; level: number
   }
 
   return data;
+}
+
+// Mapping function to convert algorithm output to clock recommendations
+export function mapAlgorithmOutputToRecommendations(outputAlgorithm: Array<{ timestamp: string; suggested_state: string; value: number }>): Array<{ hour: number; source: string }> {
+  console.log('Rohe Algorithmus-Ausgabe:', outputAlgorithm);
+  
+  const recommendations: Array<{ hour: number; source: string }> = [];
+  
+  // Group by hour and take the most common suggestion for each hour
+  const hourlyGroups = new Map<number, { [key: string]: number }>();
+  
+  outputAlgorithm.forEach(entry => {
+    const date = new Date(entry.timestamp);
+    const hour = date.getHours();
+    
+    if (!hourlyGroups.has(hour)) {
+      hourlyGroups.set(hour, {});
+    }
+    
+    const hourGroup = hourlyGroups.get(hour)!;
+    // Normalisiere den Zustand zu Kleinbuchstaben für den Vergleich
+    const state = entry.suggested_state?.toLowerCase() || 'use grid';
+    console.log(`Verarbeite Eintrag - Stunde: ${hour}, Original Zustand: ${entry.suggested_state}, Normalisiert: ${state}`);
+    hourGroup[state] = (hourGroup[state] || 0) + 1;
+  });
+  
+  console.log('Gruppierte Daten nach Stunden:', Object.fromEntries(hourlyGroups));
+  
+  // Convert algorithm states to clock sources
+  for (let hour = 0; hour < 24; hour++) {
+    const hourGroup = hourlyGroups.get(hour) || {};
+    let mostCommonState = "use grid"; // Default state
+    let maxCount = 0;
+    
+    console.log(`\nAnalysiere Stunde ${hour}:`, hourGroup);
+    
+    for (const [state, count] of Object.entries(hourGroup)) {
+      if (count > maxCount) {
+        maxCount = count;
+        mostCommonState = state;
+      }
+    }
+    
+    // Map algorithm states to clock sources
+    let source: string;
+    switch (mostCommonState) {
+      case "charge battery":
+        source = "solar-to-battery";
+        break;
+      case "use grid":
+        source = "grid";
+        break;
+      case "power the household from solar":
+        source = "solar-direct";
+        break;
+      case "mixed":
+        source = "battery";
+        break;
+      default:
+        console.log(`Unbekannter Zustand für Stunde ${hour}: "${mostCommonState}"`);
+        source = "grid";
+    }
+    
+    console.log(`Stunde ${hour}: Häufigster Zustand = "${mostCommonState}" -> Quelle = "${source}"`);
+    
+    recommendations.push({ hour, source });
+  }
+  
+  console.log('Finale Empfehlungen:', recommendations);
+  
+  return recommendations;
 }

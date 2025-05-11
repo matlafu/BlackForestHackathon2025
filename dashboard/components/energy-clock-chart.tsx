@@ -603,7 +603,7 @@ export function EnergyClockChart({ data, isRefreshing = false }: EnergyClockChar
           <TabsContent value="analytics">
             <div className="flex flex-col space-y-2">
               {TABLES.map(table => {
-                const chartData = data[table.id as keyof Pick<EnergyData, 'solar_output' | 'battery_storage_status' | 'grid_usage' | 'output_algorithm'>] || [];
+                const chartData = data[table.id as keyof Pick<EnergyData, 'solar_output' | 'battery_storage_status' | 'grid_usage'>] || [];
                 
                 // Sortiere die Daten nach Timestamp
                 const sortedData = [...chartData].sort((a, b) => {
