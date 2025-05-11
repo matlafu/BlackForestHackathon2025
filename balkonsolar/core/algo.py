@@ -30,7 +30,6 @@ irradiation_forecast = irradiation_forecast.rename(columns={"watt_hours": "pv_pr
 # Get grid usage forecast
 grid_usage_forecast = db.get_grid_usage_forecast()
 grid_usage_forecast["timestamp"] = grid_usage_forecast["timestamp"].apply(lambda x: datetime.strptime(x.replace("+02:00", ""), "%Y-%m-%d %H:%M:%S"))
-grid_usage_forecast = grid_usage_forecast.rename(columns={"grid_state": "grid_demand"})
 # Set the timestamp as index
 grid_usage_forecast = grid_usage_forecast.set_index("timestamp")
 
@@ -38,7 +37,7 @@ grid_usage_forecast = grid_usage_forecast.set_index("timestamp")
 average_grid_usage = read_average_energy_consumption(datetime.now())
 
 # Create a mock DataFrame for the next 24 hours
-hours = pd.date_range(start=datetime.now().replace(minute=0, second=0, microsecond=0), periods=24, freq='H')
+hours = pd.date_range(start=datetime.now().replace(minute=0, second=0, microsecond=0), periods=24, freq='h')
 np.random.seed(42)
 
 # Simulated data bc out battery is not working and our pv is also not genearting any power so our virtual battery is empty lol
@@ -57,7 +56,7 @@ df = pd.merge(df, irradiation_forecast, left_index=True, right_index=True, how="
 # Merge grid usage forecast with df
 df = pd.merge(df, grid_usage_forecast, left_index=True, right_index=True, how="left")
 # Fill the missing values with 0
-df["grid_demand"] = df["grid_demand"].fillna(0)
+df["grid_state"] = df["grid_state"].fillna(0)
 df["pv_prod"] = df["pv_prod"].fillna(0)
 
 # Set battery capacity values
@@ -75,7 +74,7 @@ df["suggested_state"] = "use grid"
 remaining_to_charge = battery_needed
 
 # Charging phase: prioritize hours for charging
-for idx, row in df.sort_values(by=["grid_demand", "surplus"], ascending=[True, False]).iterrows():
+for idx, row in df.sort_values(by=["grid_state", "surplus"], ascending=[True, False]).iterrows():
     if remaining_to_charge <= 0:
         break
 
