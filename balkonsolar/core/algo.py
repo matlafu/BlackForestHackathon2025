@@ -66,8 +66,8 @@ df["grid_state"] = df["grid_state"].fillna(0)
 df["pv_prod"] = df["pv_prod"].fillna(0)
 
 # Set battery capacity values
-battery_max = 2000  # Wh
-battery_current = 1500  # Wh
+battery_max = 2560  # Wh
+battery_current = 500  # Wh
 battery_needed = battery_max - battery_current
 
 # Add helper column for sorting: surplus = pv_prod - usage
@@ -111,7 +111,7 @@ for idx, row in df.iterrows():
 # Drop helper column before presenting
 df.drop(columns=["surplus"], inplace=True)
 
-# Transform the index to a column 
+# Transform the index to a column
 df.reset_index(inplace=True)
 df.rename(columns={"index": "timestamp"}, inplace=True)
 

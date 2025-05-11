@@ -5,6 +5,12 @@ import * as HoverCardPrimitive from "@radix-ui/react-hover-card"
 
 import { cn } from "@/lib/utils"
 
+/*
+  HoverCard component suite for the Balkonsolar Dashboard UI
+  - Provides HoverCard, HoverCardTrigger, and HoverCardContent
+  - Built on Radix UI primitives for accessible, animated hover cards/tooltips
+*/
+
 const HoverCard = HoverCardPrimitive.Root
 
 const HoverCardTrigger = HoverCardPrimitive.Trigger

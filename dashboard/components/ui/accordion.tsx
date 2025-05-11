@@ -6,6 +6,12 @@ import { ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Accordion component suite for the Balkonsolar Dashboard UI
+  - Provides Accordion, AccordionItem, AccordionTrigger, and AccordionContent
+  - Built on Radix UI primitives for accessible, animated accordions
+*/
+
 const Accordion = AccordionPrimitive.Root
 
 const AccordionItem = React.forwardRef<

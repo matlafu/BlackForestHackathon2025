@@ -8,6 +8,12 @@ import { Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 
+/*
+  Command component suite for the Balkonsolar Dashboard UI
+  - Provides Command, CommandDialog, CommandInput, CommandList, CommandItem, and related subcomponents
+  - Built on cmdk and Radix UI for command palettes, search, and quick actions
+*/
+
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive>

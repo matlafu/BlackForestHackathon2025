@@ -15,6 +15,12 @@ import {
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
+/*
+  Form component suite for the Balkonsolar Dashboard UI
+  - Provides Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage, and related hooks
+  - Built on react-hook-form and Radix UI for accessible, flexible forms
+*/
+
 const Form = FormProvider
 
 type FormFieldContextValue<

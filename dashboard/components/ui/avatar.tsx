@@ -5,6 +5,12 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Avatar component suite for the Balkonsolar Dashboard UI
+  - Provides Avatar, AvatarImage, and AvatarFallback for user/profile images
+  - Built on Radix UI primitives for accessibility and fallback support
+*/
+
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>

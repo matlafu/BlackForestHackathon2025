@@ -1,18 +1,28 @@
 import sqlite3
 import os
 
+"""
+Database creation script for Balkonsolar energy monitoring.
+
+Creates a SQLite database with tables for solar output, battery status, grid usage, irradiation, and forecasts. Intended to be run once during setup or for database resets.
+"""
+
 def create_energy_database(db_path="balkonsolar/data/energy_data.db"):
-    """Create a SQLite database with tables for energy monitoring"""
-    
+    """
+    Create a SQLite database with tables for energy monitoring and forecasting.
+
+    Args:
+        db_path (str): Path where the database will be created (default: 'balkonsolar/data/energy_data.db').
+    """
     # Ensure directory exists if needed
     db_dir = os.path.dirname(db_path)
     if db_dir and not os.path.exists(db_dir):
         os.makedirs(db_dir)
-    
+
     # Connect to database (will create it if it doesn't exist)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
+
     # Create tables
     tables = [
         # Solar output table
@@ -23,7 +33,7 @@ def create_energy_database(db_path="balkonsolar/data/energy_data.db"):
             value REAL NOT NULL
         )
         """,
-        
+
         # Battery storage status table
         """
         CREATE TABLE IF NOT EXISTS battery_storage_status (
@@ -32,7 +42,7 @@ def create_energy_database(db_path="balkonsolar/data/energy_data.db"):
             value REAL NOT NULL
         )
         """,
-        
+
         # Grid usage table
         """
         CREATE TABLE IF NOT EXISTS grid_usage (
@@ -41,7 +51,7 @@ def create_energy_database(db_path="balkonsolar/data/energy_data.db"):
             value REAL NOT NULL
         )
         """,
-        
+
         # Output algorithm table
         """
         CREATE TABLE IF NOT EXISTS output_algorithm (
@@ -66,11 +76,11 @@ def create_energy_database(db_path="balkonsolar/data/energy_data.db"):
         )
         """
     ]
-    
+
     # Execute each table creation query
     for table_query in tables:
         cursor.execute(table_query)
-    
+
     # Create indexes for faster timestamp queries
     indexes = [
         "CREATE INDEX IF NOT EXISTS idx_solar_tstamp ON solar_output(tstamp)",
@@ -80,16 +90,16 @@ def create_energy_database(db_path="balkonsolar/data/energy_data.db"):
         "CREATE INDEX IF NOT EXISTS idx_irradiation_tstamp ON irradiation_data(tstamp)",
         "CREATE INDEX IF NOT EXISTS idx_grid_forecast_tstamp ON grid_usage_forecast(tstamp)"
     ]
-    
+
     for index_query in indexes:
         cursor.execute(index_query)
-    
+
     # Commit changes and close connection
     conn.commit()
     conn.close()
-    
+
     print(f"Database created successfully at: {db_path}")
     print("Tables created: solar_output, battery_storage_status, grid_usage, output_algorithm")
 
 if __name__ == "__main__":
-    create_energy_database() 
+    create_energy_database()

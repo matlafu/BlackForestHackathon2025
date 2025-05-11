@@ -9,6 +9,13 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { SettingsModal } from "@/components/settings-modal"
 import type { EnergyData } from "@/lib/data-service"
 
+/*
+  DashboardHeader component for the Balkonsolar Dashboard
+  - Renders the top navigation bar with logo, mode toggle, battery status, and action buttons
+  - Opens dialogs for settings and control center
+  - Used on all main dashboard pages
+*/
+
 interface DashboardHeaderProps {
   mode: "realtime" | "historic"
   setMode: (mode: "realtime" | "historic") => void

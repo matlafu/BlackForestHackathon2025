@@ -2,6 +2,12 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Input component for the Balkonsolar Dashboard UI
+  - Provides a styled input field for forms and user input
+  - Used throughout the dashboard for consistent text input appearance
+*/
+
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type, ...props }, ref) => {

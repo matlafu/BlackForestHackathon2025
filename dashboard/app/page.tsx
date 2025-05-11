@@ -1,3 +1,9 @@
+/*
+  Main dashboard page for the Balkonsolar Dashboard (Next.js App Router)
+  - Switches between realtime and historic data modes
+  - Uses mockup data for instant UI, then fetches live/historic data
+  - Renders main dashboard components: header, charts, stats, recommendations, and slider
+*/
 "use client"
 
 import { useEffect, useState } from "react"
@@ -108,7 +114,7 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
-      
+
     </div>
   )
 }

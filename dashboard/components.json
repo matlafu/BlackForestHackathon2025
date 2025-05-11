@@ -1,3 +1,6 @@
+// components.json for shadcn/ui in the Balkonsolar dashboard frontend
+// - Configures style, Tailwind, and directory aliases for component generation
+// - Used by shadcn/ui CLI and tooling
 {
   "$schema": "https://ui.shadcn.com/schema.json",
   "style": "default",

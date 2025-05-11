@@ -1,3 +1,12 @@
+/*
+  Tailwind CSS configuration for the Balkonsolar dashboard frontend.
+
+  - Uses CSS variables for color theming (including custom chart and sidebar colors)
+  - Enables dark mode via class
+  - Scans all relevant folders for utility classes
+  - Extends theme with custom border radius, keyframes, and animations
+  - Includes the tailwindcss-animate plugin for UI transitions
+*/
 import type { Config } from "tailwindcss";
 
 const config: Config = {

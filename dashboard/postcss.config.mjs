@@ -6,3 +6,6 @@ const config = {
 };
 
 export default config;
+
+// PostCSS configuration for the Balkonsolar dashboard frontend
+// - Loads Tailwind CSS as a PostCSS plugin for utility-first styling

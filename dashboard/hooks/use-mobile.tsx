@@ -2,6 +2,12 @@ import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
 
+/*
+  useIsMobile custom hook for the Balkonsolar Dashboard
+  - Returns true if the viewport is below the mobile breakpoint (768px)
+  - Used for responsive UI logic
+*/
+
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 

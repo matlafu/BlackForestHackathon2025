@@ -6,6 +6,12 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/*
+  DropdownMenu component suite for the Balkonsolar Dashboard UI
+  - Provides DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, and related subcomponents
+  - Built on Radix UI primitives for accessible, customizable dropdown menus
+*/
+
 const DropdownMenu = DropdownMenuPrimitive.Root
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger

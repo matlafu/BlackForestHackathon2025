@@ -6,6 +6,12 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/*
+  ContextMenu component suite for the Balkonsolar Dashboard UI
+  - Provides ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, and related subcomponents
+  - Built on Radix UI primitives for accessible, customizable right-click/context menus
+*/
+
 const ContextMenu = ContextMenuPrimitive.Root
 
 const ContextMenuTrigger = ContextMenuPrimitive.Trigger

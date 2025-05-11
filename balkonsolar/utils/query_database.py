@@ -5,13 +5,31 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="balkonsolar/.env")
 
+"""
+Interactive utility for querying the Balkonsolar SQLite database.
+
+Allows users to view recent records or query by date range for any table in the database, via a command-line interface.
+"""
+
 def get_default_db_path():
-    """Get the default database path"""
+    """
+    Get the default database path (in the user's home directory).
+
+    Returns:
+        str: Default path to the energy_data.db file.
+    """
     home_dir = os.path.expanduser("~")
     return os.path.join(home_dir, "energy_data.db")
 
 def query_table(db_path, table_name, limit=10):
-    """Query a table from the database and print results"""
+    """
+    Query a table from the database and print the most recent records.
+
+    Args:
+        db_path (str): Path to the SQLite database file.
+        table_name (str): Name of the table to query.
+        limit (int): Number of recent records to display.
+    """
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -39,7 +57,15 @@ def query_table(db_path, table_name, limit=10):
     conn.close()
 
 def get_data_by_date_range(db_path, table_name, start_date, end_date):
-    """Query data from a specific date range"""
+    """
+    Query data from a specific date range and print the results.
+
+    Args:
+        db_path (str): Path to the SQLite database file.
+        table_name (str): Name of the table to query.
+        start_date (str): Start date/time (inclusive).
+        end_date (str): End date/time (inclusive).
+    """
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -65,6 +91,10 @@ def get_data_by_date_range(db_path, table_name, start_date, end_date):
     conn.close()
 
 def main():
+    """
+    Command-line interface for querying the Balkonsolar database.
+    Allows users to select tables, view recent records, or query by date range.
+    """
     # Get the database path
     db_path = input(f"Enter database path (press Enter for default {get_default_db_path()}): ")
     if not db_path:

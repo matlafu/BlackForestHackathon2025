@@ -3,6 +3,12 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Badge component for the Balkonsolar Dashboard UI
+  - Provides a styled badge with variant options (default, secondary, destructive, outline)
+  - Used for status indicators, labels, and highlights throughout the dashboard
+*/
+
 const badgeVariants = cva(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {

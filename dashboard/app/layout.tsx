@@ -1,3 +1,9 @@
+/*
+  Root layout for the Balkonsolar Dashboard (Next.js App Router)
+  - Applies global styles and Inter font
+  - Wraps all pages in the ThemeProvider for dark/light mode
+  - Sets up HTML metadata
+*/
 import type React from "react"
 import "@/app/globals.css"
 import { Inter } from "next/font/google"

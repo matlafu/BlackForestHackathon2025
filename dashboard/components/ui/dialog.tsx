@@ -83,6 +83,12 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
+/*
+  Dialog component suite for the Balkonsolar Dashboard UI
+  - Provides Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, and related subcomponents
+  - Built on Radix UI primitives for accessible, animated modal dialogs
+*/
+
 export {
   Dialog,
   DialogPortal,

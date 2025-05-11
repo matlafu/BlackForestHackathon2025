@@ -6,6 +6,12 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
+/*
+  AlertDialog component suite for the Balkonsolar Dashboard UI
+  - Provides AlertDialog, AlertDialogTrigger, AlertDialogContent, and related subcomponents
+  - Built on Radix UI primitives for accessible, animated alert dialogs
+*/
+
 const AlertDialog = AlertDialogPrimitive.Root
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger

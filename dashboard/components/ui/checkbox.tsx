@@ -6,6 +6,12 @@ import { Check } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Checkbox component for the Balkonsolar Dashboard UI
+  - Provides a styled checkbox using Radix UI primitives
+  - Used for forms, settings, and toggles throughout the dashboard
+*/
+
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>

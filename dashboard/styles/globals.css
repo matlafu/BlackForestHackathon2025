@@ -1,3 +1,9 @@
+/*
+  globals.css for the Balkonsolar Dashboard
+  - Loads Tailwind base, components, and utilities
+  - Defines CSS variables for theming (light/dark, chart, sidebar)
+  - Adds global and utility styles for consistent UI
+*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
