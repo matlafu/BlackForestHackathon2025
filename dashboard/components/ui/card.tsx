@@ -2,6 +2,12 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Card component suite for the Balkonsolar Dashboard UI
+  - Provides Card, CardHeader, CardTitle, CardDescription, CardContent, and CardFooter
+  - Used for consistent, styled containers throughout the dashboard
+*/
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

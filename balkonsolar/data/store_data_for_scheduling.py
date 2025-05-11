@@ -11,6 +11,9 @@ from balkonsolar.core.database_interface import DatabaseInterface
 
 
 def store_solar_production_predictions():
+    """
+    Fetch solar production forecast from the ForecastSolar API and store it in the database.
+    """
     (lat, lon) = (48.0173627,7.8272418) # the FRIZ
     client = ForecastSolarClient(
         latitude=lat,
@@ -70,6 +73,9 @@ def __full_hours_in_interval(
 
 
 def store_grid_state_predictions():
+    """
+    Fetch grid state forecast from the StromGedacht API and store it in the database.
+    """
     client = StromGedachtClient(zip_code=79110)
     grid_forecast = asyncio.run(client.get_forecast())
 
@@ -81,6 +87,9 @@ def store_grid_state_predictions():
     dbi.store_grid_usage_forecast(grid_state_df)
 
 def main():
+    """
+    Fetch and store both solar production and grid state predictions.
+    """
     store_solar_production_predictions()
     store_grid_state_predictions()
 

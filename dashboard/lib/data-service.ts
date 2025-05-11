@@ -1,3 +1,8 @@
+/*
+  data-service.ts for the Balkonsolar Dashboard
+  - Provides types, mock data, and utility functions for fetching and generating energy data
+  - Used by the dashboard UI for both mockup and live/historic data
+*/
 // This is a mock data service that would normally fetch data from a database
 // In a real application, you would replace this with actual API calls
 
@@ -283,14 +288,14 @@ function generateHistoricalDataPoints(baseValue: number, hours: number = 24): Ar
   const data = [];
   const now = new Date();
   now.setMinutes(0, 0, 0); // Runde auf volle Stunden
-  
+
   for (let i = 0; i < hours; i++) {
     // Berechne den Zeitstempel für jede Stunde, beginnend von 24 Stunden vor jetzt
     const time = new Date(now.getTime());
     time.setHours(time.getHours() - (hours - 1 - i));
-    
+
     const hourOfDay = time.getHours();
-    
+
     // Add daily pattern variation
     let multiplier = 1;
     if (hourOfDay >= 6 && hourOfDay <= 18) { // Daytime hours
@@ -299,17 +304,17 @@ function generateHistoricalDataPoints(baseValue: number, hours: number = 24): Ar
     } else { // Nighttime hours
       multiplier = 0.5;
     }
-    
+
     // Add some random variation
     const randomFactor = 0.8 + Math.random() * 0.4;
-    
+
     data.push({
       id: i + 1,
       timestamp: time.toISOString(),
       value: baseValue * multiplier * randomFactor
     });
   }
-  
+
   return data;
 }
 
@@ -427,7 +432,7 @@ export async function fetchCurrentData(): Promise<EnergyData> {
     ]);
 
     const now = new Date();
-    
+
     // Get the latest values from the single record queries
     const currentSolarProduction = solarOutput[0]?.value || 0;
     const currentBatteryStorage = batteryStatus[0]?.value || 0;
@@ -468,7 +473,7 @@ export async function fetchHistoricData(time: Date): Promise<EnergyData> {
   try {
     // Convert the time to ISO string for the API
     const timestamp = time.toISOString();
-    
+
     // Fetch data for each table around the specified time
     const [solarOutput, batteryStatus, gridUsage, outputAlgorithm] = await Promise.all([
       fetch(`/api/energy?table=solar_output&timestamp=${timestamp}&limit=24`).then(res => res.json()),
@@ -571,7 +576,7 @@ export function generateHistoricBatteryData(): Array<{ time: Date; level: number
   for (let i = 0; i < 24; i++) {
     const time = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000);
     const hour = time.getHours();
-    
+
     // Simuliere einen typischen Tagesverlauf des Batteriestands
     let level = 0.5; // Grundniveau
 

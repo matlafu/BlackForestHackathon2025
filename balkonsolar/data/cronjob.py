@@ -1,4 +1,8 @@
+"""
+Cronjob scheduler for Balkonsolar data updates.
 
+Periodically fetches and stores solar and grid forecast data by running the store_data_for_scheduling script every 30 minutes, with timeout and error handling.
+"""
 from apscheduler.schedulers.background import BackgroundScheduler
 from store_data_for_scheduling import main as store_data_for_scheduling
 import multiprocessing
@@ -6,13 +10,22 @@ from datetime import datetime
 
 
 def main():
-        #script_cop
+    """
+    Set up and start the background scheduler to periodically run data fetching and storage.
+    """
     scheduler = BackgroundScheduler()
+    # Schedule the job to run every 30 minutes, with a timeout of 20 seconds
     scheduler.add_job(call_timeout, 'interval', minutes=30, misfire_grace_time=60, next_run_time=datetime.now(), args=(20, store_data_for_scheduling))
 
 
 def call_timeout(timeout, func):
+    """
+    Run a function in a separate process with a timeout. If the function does not complete in time, terminate it.
 
+    Args:
+        timeout (int or float): Maximum time in seconds to allow the function to run.
+        func (callable): The function to execute.
+    """
     if type(timeout) not in [int, float] or timeout <= 0.0:
         print("Invalid timeout!")
 
@@ -46,4 +59,3 @@ def call_timeout(timeout, func):
 if __name__ == '__main__':
 
     main()
-

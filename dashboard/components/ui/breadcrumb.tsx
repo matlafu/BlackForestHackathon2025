@@ -4,6 +4,12 @@ import { ChevronRight, MoreHorizontal } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Breadcrumb component suite for the Balkonsolar Dashboard UI
+  - Provides Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, and BreadcrumbEllipsis
+  - Used for navigation and supports accessibility best practices
+*/
+
 const Breadcrumb = React.forwardRef<
   HTMLElement,
   React.ComponentPropsWithoutRef<"nav"> & {

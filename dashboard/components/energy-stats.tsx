@@ -5,6 +5,12 @@ import { Battery, Bolt, Lightbulb, RefreshCw, Zap } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { EnergyData } from "@/lib/data-service"
 
+/*
+  EnergyStats component for the Balkonsolar Dashboard
+  - Displays solar production, battery storage, grid usage, and total consumption
+  - Used in the main dashboard to show current energy statistics
+*/
+
 interface EnergyStatsProps {
   data: EnergyData
   isRefreshing?: boolean
@@ -67,7 +73,7 @@ export function EnergyStats({ data, isRefreshing = false }: EnergyStatsProps) {
             <span className="font-medium">{data.totalConsumption.toFixed(1)} kWh</span>
           </div>
 
-          
+
         </div>
       </CardContent>
     </Card>

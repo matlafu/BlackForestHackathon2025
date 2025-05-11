@@ -1,3 +1,11 @@
+// TypeScript configuration for the Balkonsolar dashboard frontend (Next.js)
+// - Enables strict type checking and modern JS features
+// - Supports path aliases (e.g., @/ for project root)
+// - Configured for Next.js and incremental builds
+// - No JS output (noEmit: true)
+// - Includes all .ts/.tsx files except node_modules
+//
+// See https://www.typescriptlang.org/tsconfig for more info
 {
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],

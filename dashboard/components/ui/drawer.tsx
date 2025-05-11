@@ -5,6 +5,12 @@ import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Drawer component suite for the Balkonsolar Dashboard UI
+  - Provides Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription, and related subcomponents
+  - Built on vaul for accessible, animated bottom sheet drawers
+*/
+
 const Drawer = ({
   shouldScaleBackground = true,
   ...props

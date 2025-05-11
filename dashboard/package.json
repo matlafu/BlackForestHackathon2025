@@ -1,3 +1,8 @@
+// package.json for the Balkonsolar dashboard frontend
+// - Next.js React app with TypeScript
+// - Uses Radix UI, Tailwind CSS, and Recharts for UI and charts
+// - Includes form, theme, and SQLite support for a modern dashboard
+// - Scripts: dev, build, start, lint
 {
   "name": "my-v0-project",
   "version": "0.1.0",

@@ -7,6 +7,12 @@ import { DayPicker } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
+/*
+  Calendar component for the Balkonsolar Dashboard UI
+  - Provides a styled calendar using react-day-picker
+  - Used for date selection in forms, filters, and scheduling
+*/
+
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 function Calendar({
