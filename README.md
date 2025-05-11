@@ -15,7 +15,7 @@ The system uses real-time data integration from weather forecasts, electricity p
 │ External Data Sources   │     │ Home Assistant          │
 │ - Weather Forecasts     │◄───►│ - Sensor Integration    │   
 │ - Grid Demand           │     │ - User Interface        │
-|                         |     | - Device Control        │
+| - Average grid usage    |     | - Device Control        │
 └─────────────────────────┘     └─────────────────────────┘
             ▲                               ▲
             │                               │
@@ -30,7 +30,29 @@ The system uses real-time data integration from weather forecasts, electricity p
 
 ## How it works:
 
-1.- We Collect 
+1.- We collect the following data: 
+- Some data from the user:
+  - Location (latitude, longitude, zip code)
+  - Solar panel size (Wp)
+  - Battery size (kWh)
+- Weather forecast for the next 24 hours
+- Grid demand forecast
+- Current solar production
+- Current electricity usage (for the user)
+- Current battery status
+- Average energy consumption per hour & month & day of the week
+
+2.- We store the data in a database
+
+3.- We run the algorithm to get the optimal energy flow. Currently implemented as a cronjob but the idea would be to trigger it via an event stream from the app daemon.
+
+4.- We store the output in the database and display it in a dashboard.
+
+## Future features:
+
+- Add it as a Home Assistant integration
+- Give the user the ability to choose between different algorithms, each one with different optimization goals.
+
 
 ### Main Components:
 
