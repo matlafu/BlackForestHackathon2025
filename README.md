@@ -112,14 +112,8 @@ The system uses real-time data integration from weather forecasts, electricity p
    ./run_appdaemon.sh
    ```
 
-<<<<<<< HEAD
 ---
 
-||||||| 32d8ce0
-   ```
-
-=======
->>>>>>> origin/main
 ## Usage Guide
 
 ### Basic Operation
