@@ -9,4 +9,6 @@ __pycache__/
 venv/*
 .envrc
 /node_modules
+memory-bank/
+
 

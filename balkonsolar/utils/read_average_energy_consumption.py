@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta
+import os
 
 def aggregate_to_hourly_preserve_columns(df):
     # Make a copy of the dataframe
@@ -69,7 +70,9 @@ def get_excel_data() -> pd.DataFrame:
     """
     Get the excel data
     """
-    df = pd.read_excel("StandardStromVerbrauch.xlsx", header=None)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    excel_path = os.path.join(script_dir, "StandardStromVerbrauch.xlsx")
+    df = pd.read_excel(excel_path, header=None)
     # Extract the header rows
     first_header = df.iloc[0]
     second_header = df.iloc[1]
@@ -98,5 +101,6 @@ def main(tstamp: datetime) -> list[float]|None:
     except Exception as e:
         print(f"Error getting values for {tstamp}: {e}")
         return None
-
+if __name__ == "__main__":
+    main(datetime.now())
 
