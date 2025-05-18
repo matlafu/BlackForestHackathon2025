@@ -38,6 +38,7 @@ export interface EnergyData {
     timestamp: string;
     suggested_state: string;
     value: number;
+    usage: number;
   }>;
 }
 
@@ -319,11 +320,25 @@ function generateHistoricalDataPoints(baseValue: number, hours: number = 24, isA
         suggested_state = "Use Grid";
       }
       
+      // Berechne einen realistischen Verbrauchswert basierend auf der Tageszeit
+      const baseUsage = 0.8; // Grundlast
+      let usageMultiplier = 1.0;
+      
+      // Höherer Verbrauch morgens und abends
+      if (hourOfDay >= 6 && hourOfDay <= 9) { // Morgenspitze
+        usageMultiplier = 1.5;
+      } else if (hourOfDay >= 17 && hourOfDay <= 22) { // Abendspitze
+        usageMultiplier = 1.8;
+      } else if (hourOfDay >= 23 || hourOfDay <= 5) { // Nachts
+        usageMultiplier = 0.6;
+      }
+      
       data.push({
         id: i + 1,
         timestamp: time.toISOString(),
         suggested_state,
-        value: baseValue * multiplier * randomFactor
+        value: baseValue * multiplier * randomFactor,
+        usage: baseUsage * usageMultiplier * randomFactor
       });
     } else {
       data.push({
@@ -452,7 +467,8 @@ export async function fetchCurrentData(): Promise<EnergyData> {
       id: entry.id || undefined,
       timestamp: entry.timestamp,
       suggested_state: entry.suggested_state || entry.grid_state || 'Use Grid', // Fallback auf grid_state oder 'Use Grid'
-      value: entry.value || 0
+      value: entry.value || 0,
+      usage: entry.usage || 0
     }));
 
     console.log('Formatierte Algorithmus-Ausgabe:', formattedOutputAlgorithm);
@@ -534,7 +550,8 @@ export async function fetchHistoricData(time: Date): Promise<EnergyData> {
       id: entry.id || undefined,
       timestamp: entry.timestamp,
       suggested_state: entry.suggested_state || entry.grid_state || 'Use Grid', // Fallback auf grid_state oder 'Use Grid'
-      value: entry.value || 0
+      value: entry.value || 0,
+      usage: entry.usage || 0
     }));
 
     console.log('Formatierte historische Algorithmus-Ausgabe:', formattedOutputAlgorithm);

@@ -274,7 +274,7 @@ export function EnergyClockChart({ data, isRefreshing = false }: EnergyClockChar
                       break
                     case "battery":
                       centerColor = "rgba(34, 197, 94, 1)" // green-500
-                      recommendationText = "Use Battery"
+                      recommendationText = "Mixed Use"
                       break
                     case "grid":
                       centerColor = "rgba(59, 130, 246, 1)" // blue-500
@@ -322,7 +322,7 @@ export function EnergyClockChart({ data, isRefreshing = false }: EnergyClockChar
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 rounded-full bg-green-500"></div>
-                <span className="text-sm">Use Battery</span>
+                <span className="text-sm">Mixed Use</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 rounded-full bg-blue-500"></div>

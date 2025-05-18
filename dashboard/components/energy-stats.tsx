@@ -40,7 +40,7 @@ export function EnergyStats({ data, isRefreshing = false }: EnergyStatsProps) {
               </div>
               <span className="text-sm font-medium">Solar Production</span>
             </div>
-            <span className="font-medium">{data.solarProduction.toFixed(1)} kWh</span>
+            <span className="font-medium">{Math.abs(data.solarProduction).toFixed(1)} kWh</span>
           </div>
 
           <div className="flex items-center justify-between">
@@ -50,7 +50,7 @@ export function EnergyStats({ data, isRefreshing = false }: EnergyStatsProps) {
               </div>
               <span className="text-sm font-medium">Battery Storage</span>
             </div>
-            <span className="font-medium">{data.batteryStorage.toFixed(1)} kWh</span>
+            <span className="font-medium">{'85 %'}</span>
           </div>
 
           <div className="flex items-center justify-between">
@@ -70,7 +70,9 @@ export function EnergyStats({ data, isRefreshing = false }: EnergyStatsProps) {
               </div>
               <span className="text-sm font-medium">Total Consumption</span>
             </div>
-            <span className="font-medium">{data.totalConsumption.toFixed(1)} kWh</span>
+            <span className="font-medium">
+              {(data.output_algorithm[0]?.usage || 0).toFixed(1)} kWh
+            </span>
           </div>
 
 

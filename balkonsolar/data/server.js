@@ -49,7 +49,7 @@ app.get('/api/energy', async (req, res) => {
     // Baue Query
     let query;
     if (table === 'output_algorithm') {
-      query = `SELECT timestamp, suggested_state as suggested_state, grid_state as value FROM ${table}`;
+      query = `SELECT timestamp, suggested_state as suggested_state, grid_state as value, usage as usage FROM ${table}`;
     } else {
       query = `SELECT tstamp as timestamp, value FROM ${table}`;
     }
